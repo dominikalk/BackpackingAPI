@@ -1,0 +1,6 @@
+@Backpacking.API_HostAddress = http://localhost:5161
+
+GET {{Backpacking.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
