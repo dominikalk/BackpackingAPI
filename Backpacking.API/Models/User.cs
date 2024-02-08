@@ -4,8 +4,8 @@ namespace Backpacking.API.Models;
 
 public class User : IdentityUser
 {
-    //public IEnumerable<Guid> LocationIds { get; set; } = new List<Guid>();
-    //public IEnumerable<Location> locations { get; set; } = new List<Location>();
-    //public DateTimeOffset CreatedDate { get; set; }
-    //public DateTimeOffset LastModifiedDate { get; set; }
+    public Guid? CurrentLocationId { get; set; }
+    public Location? CurrentLocation { get; set; }
+    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset LastModifiedDate { get; set; }
 }

@@ -2,11 +2,13 @@
 using Backpacking.API.Models.DTO;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backpacking.API.Controllers;
 
 [Route("v1/location")]
+[Authorize]
 [ApiController]
 public class LocationV1Controller : ControllerBase
 {

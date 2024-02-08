@@ -19,10 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\DTO\" />
-    <Folder Include="Logic\" />
+    <Folder Include="Logic\Locations\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Tests\" />
-    <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
 </Project>
