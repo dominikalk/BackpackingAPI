@@ -1,6 +1,6 @@
 ﻿namespace Backpacking.API.Models;
 
-public class Location : IModel
+public class Location : IBPModel
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
@@ -11,11 +11,11 @@ public class Location : IModel
     public DateTimeOffset CreatedDate { get; set; }
     public DateTimeOffset LastModifiedDate { get; set; }
 
-    public Location(string Name, float Longitude, float Latitude, Guid userId)
+    public Location(string name, float longitude, float latitude, Guid userId)
     {
-        this.Name = Name;
-        this.Longitude = Longitude;
-        this.Latitude = Latitude;
+        Name = name;
+        Longitude = longitude;
+        Latitude = latitude;
         UserId = userId;
     }
 }

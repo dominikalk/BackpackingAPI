@@ -1,5 +1,7 @@
 using Backpacking.API.DbContexts;
 using Backpacking.API.Models;
+using Backpacking.API.Services;
+using Backpacking.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -23,13 +25,15 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddDbContext<BackpackingContext>(options =>
+builder.Services.AddDbContext<BPContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<User>()
-    .AddEntityFrameworkStores<BackpackingContext>();
+    .AddEntityFrameworkStores<BPContext>();
+
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 var app = builder.Build();
 

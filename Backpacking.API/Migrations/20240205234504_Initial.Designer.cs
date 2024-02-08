@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Backpacking.API.Migrations
 {
-    [DbContext(typeof(BackpackingContext))]
+    [DbContext(typeof(BPContext))]
     [Migration("20240205234504_Initial")]
     partial class Initial
     {

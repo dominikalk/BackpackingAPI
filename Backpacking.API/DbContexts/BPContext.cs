@@ -1,4 +1,5 @@
 ﻿using Backpacking.API.Models;
+using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -6,18 +7,18 @@ using System.Net;
 
 namespace Backpacking.API.DbContexts;
 
-public class BackpackingContext : IdentityDbContext<User>, IBackpackingContext
+public class BPContext : IdentityDbContext<User>, IBPContext
 {
-    private readonly ILogger<BackpackingContext> _logger;
+    private readonly ILogger<BPContext> _logger;
 
-    public BackpackingContext(
-        DbContextOptions<BackpackingContext> options,
-        ILogger<BackpackingContext> logger) : base(options)
+    public BPContext(
+        DbContextOptions<BPContext> options,
+        ILogger<BPContext> logger) : base(options)
     {
         _logger = logger;
     }
 
-    public DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IModel => Set<TEntity>();
+    public DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IBPModel => Set<TEntity>();
 
     public DbSet<Location> Locations => Set<Location>();
 
@@ -28,19 +29,19 @@ public class BackpackingContext : IdentityDbContext<User>, IBackpackingContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public new async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)
     {
         try
         {
             UpdateTimestamps();
             await base.SaveChangesAsync(cancellationToken);
 
-            return (int)HttpStatusCode.OK;
+            return Result.Ok();
         }
         catch (DbUpdateException ex)
         {
             _logger.LogError(ex, "Save changes failed");
-            return (int)HttpStatusCode.InternalServerError;
+            return new BPError(HttpStatusCode.BadRequest, "Could not save changes.");
         }
     }
 
@@ -53,7 +54,7 @@ public class BackpackingContext : IdentityDbContext<User>, IBackpackingContext
         // add created date for new entries
         foreach (var insertedEntry in insertedEntries)
         {
-            if (insertedEntry is IModel applicationModel)
+            if (insertedEntry is IBPModel applicationModel)
             {
                 applicationModel.CreatedDate = DateTimeOffset.UtcNow;
                 applicationModel.LastModifiedDate = DateTimeOffset.UtcNow;
@@ -67,7 +68,7 @@ public class BackpackingContext : IdentityDbContext<User>, IBackpackingContext
 
         foreach (var modifiedEntry in modifiedEntries)
         {
-            if (modifiedEntry is IModel applicationModel)
+            if (modifiedEntry is IBPModel applicationModel)
             {
                 applicationModel.LastModifiedDate = DateTimeOffset.UtcNow;
             }

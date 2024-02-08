@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Backpacking.API.Migrations
 {
-    [DbContext(typeof(BackpackingContext))]
+    [DbContext(typeof(BPContext))]
     partial class BackpackingContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

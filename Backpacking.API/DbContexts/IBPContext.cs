@@ -1,17 +1,18 @@
 ﻿using Backpacking.API.Models;
+using Backpacking.API.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
 
 namespace Backpacking.API.DbContexts;
 
-public interface IBackpackingContext
+public interface IBPContext
 {
-    DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IModel;
+    DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IBPModel;
 
     DbSet<Location> Locations { get; }
 
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
+    Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class;
     ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
     EntityEntry<TEntity> Attach<TEntity>(TEntity entity) where TEntity : class;
