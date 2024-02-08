@@ -7,7 +7,7 @@ public class Location : IBPModel
     public float Longitude { get; set; }
     public float Latitude { get; set; }
     public Guid UserId { get; init; }
-    public User? User { get; init; }
+    public BPUser? User { get; init; }
     public DateTimeOffset CreatedDate { get; set; }
     public DateTimeOffset LastModifiedDate { get; set; }
 

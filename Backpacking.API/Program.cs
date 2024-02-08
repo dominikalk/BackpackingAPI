@@ -30,10 +30,11 @@ builder.Services.AddDbContext<IBPContext, BPContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityApiEndpoints<User>()
+builder.Services.AddIdentityApiEndpoints<BPUser>()
     .AddEntityFrameworkStores<BPContext>();
 
 var app = builder.Build();
@@ -45,7 +46,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapIdentityApi<User>();
+app.MapIdentityApi<BPUser>();
 
 app.UseHttpsRedirection();
 

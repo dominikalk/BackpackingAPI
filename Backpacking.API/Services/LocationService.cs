@@ -10,10 +10,23 @@ namespace Backpacking.API.Services;
 public class LocationService : ILocationService
 {
     private readonly IBPContext _bPContext;
+    private readonly IUserService _userService;
 
-    public LocationService(IBPContext bPContext)
+    public LocationService(
+        IBPContext bPContext,
+        IUserService userService)
     {
         _bPContext = bPContext;
+        _userService = userService;
+    }
+
+    public async Task<Result<Location?>> GetCurrentLocation()
+    {
+        Result<Location?> result = await _userService.GetCurrentUser()
+            .Then<BPUser, Location?>(currentUser => currentUser.CurrentLocation);
+
+        return result;
+
     }
 
     public async Task<Result<Location>> GetLocationById(Guid id)

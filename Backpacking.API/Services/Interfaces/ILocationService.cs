@@ -5,5 +5,6 @@ namespace Backpacking.API.Services.Interfaces;
 
 public interface ILocationService
 {
+    Task<Result<Location?>> GetCurrentLocation();
     Task<Result<Location>> GetLocationById(Guid id);
 }

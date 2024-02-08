@@ -4,6 +4,7 @@ using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Backpacking.API.Controllers;
 
@@ -17,6 +18,28 @@ public class LocationV1Controller : ControllerBase
     public LocationV1Controller(ILocationService locationService)
     {
         _locationService = locationService;
+    }
+
+    [HttpGet]
+    [EndpointName(nameof(GetCurrentLocation))]
+    public async Task<IActionResult> GetCurrentLocation()
+    {
+        Result<Location?> response = await _locationService.GetCurrentLocation();
+
+        if (response.Success && response.Value is null)
+        {
+            response = new BPError(HttpStatusCode.NotFound, "No current location exists.");
+        }
+
+        return response.Finally(HandleSuccess!, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
+        }
     }
 
     [HttpGet("{id:guid}")]

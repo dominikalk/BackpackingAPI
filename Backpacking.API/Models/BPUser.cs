@@ -2,7 +2,7 @@
 
 namespace Backpacking.API.Models;
 
-public class User : IdentityUser
+public class BPUser : IdentityUser<Guid>
 {
     public Guid? CurrentLocationId { get; set; }
     public Location? CurrentLocation { get; set; }

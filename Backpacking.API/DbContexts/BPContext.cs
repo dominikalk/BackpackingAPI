@@ -7,7 +7,7 @@ using System.Net;
 
 namespace Backpacking.API.DbContexts;
 
-public class BPContext : IdentityDbContext<User>, IBPContext
+public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IBPContext
 {
     private readonly ILogger<BPContext> _logger;
 
