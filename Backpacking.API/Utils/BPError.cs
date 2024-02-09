@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Net;
 
 namespace Backpacking.API.Utils;
 
@@ -16,4 +17,14 @@ public sealed class BPError
         Code = code;
         Message = message;
     }
+
+    public override bool Equals(object? value)
+    {
+        return value is BPError error &&
+            Code == error.Code &&
+            Message == error.Message;
+    }
+
+    public override int GetHashCode()
+        => HashCode.Combine(Code, Message);
 }

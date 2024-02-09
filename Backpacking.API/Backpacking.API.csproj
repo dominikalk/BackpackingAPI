@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logic\Locations\" />
     <Folder Include="Migrations\" />
     <Folder Include="Tests\" />
   </ItemGroup>

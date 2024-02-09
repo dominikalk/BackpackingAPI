@@ -22,13 +22,6 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
 
     public DbSet<Location> Locations => Set<Location>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Location>();
-
-        base.OnModelCreating(modelBuilder);
-    }
-
     public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)
     {
         try

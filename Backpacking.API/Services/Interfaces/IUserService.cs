@@ -6,4 +6,5 @@ namespace Backpacking.API.Services.Interfaces;
 public interface IUserService
 {
     Task<Result<BPUser>> GetCurrentUser();
+    Result<Guid> GetCurrentUserId();
 }

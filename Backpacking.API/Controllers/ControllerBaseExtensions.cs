@@ -13,6 +13,7 @@ internal static class ControllerBaseExtensions
             HttpStatusCode.BadRequest => controller.BadRequest(error.Message),
             HttpStatusCode.NotFound => controller.NotFound(error.Message),
             HttpStatusCode.Forbidden => controller.Forbid(error.Message),
+            HttpStatusCode.Unauthorized => controller.Unauthorized(error.Message),
             _ => controller.StatusCode(StatusCodes.Status500InternalServerError)
         };
     }

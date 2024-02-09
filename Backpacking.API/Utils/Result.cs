@@ -236,20 +236,5 @@ public static class ResultExtensions
 
         return Result<TOut>.Fail(awaited.Error);
     }
-
-    //public static Result Guard(this Result result, Func<bool> func, BPError error, HttpStatusCode rootCode = HttpStatusCode.BadRequest)
-    //{
-    //    return (func(), result.Success) switch
-    //    {
-    //        // Condition successful
-    //        (true, true) => Result.Ok(),
-    //        // Condition successful but error result
-    //        (true, false) => result,
-    //        // Condition failed and success result
-    //        (false, true) => new BPError(rootCode),
-    //        // Condition failed and error result
-    //        (false, false) => AccumulateError(result, error),
-    //    };
-    //}
 }
 

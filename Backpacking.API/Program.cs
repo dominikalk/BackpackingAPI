@@ -3,7 +3,6 @@ using Backpacking.API.Models;
 using Backpacking.API.Services;
 using Backpacking.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 

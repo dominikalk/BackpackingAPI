@@ -42,6 +42,23 @@ public class LocationV1Controller : ControllerBase
         }
     }
 
+    [HttpPost]
+    [EndpointName(nameof(LogCurrentLocation))]
+    public async Task<IActionResult> LogCurrentLocation(LogCurrentLocationDTO location)
+    {
+        Result<Location> response = await _locationService.LogCurrentLocation(location);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
+        };
+    }
+
     [HttpGet("{id:guid}")]
     [EndpointName(nameof(GetLocationById))]
     public async Task<IActionResult> GetLocationById(Guid id)
