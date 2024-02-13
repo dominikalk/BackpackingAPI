@@ -1,4 +1,6 @@
-﻿namespace Backpacking.API.Models;
+﻿using Backpacking.API.Models.DTO;
+
+namespace Backpacking.API.Models;
 
 public class Location : IBPModel
 {
@@ -9,49 +11,48 @@ public class Location : IBPModel
     public Guid UserId { get; init; }
     public BPUser? User { get; init; }
     public DateTimeOffset ArriveDate { get; set; }
-    public DateTimeOffset? DepartDate { get; set; }
-    public LocationDateAccuracy LocationDateAccuracy { get; set; }
+    public DateTimeOffset DepartDate { get; set; } = DateTimeOffset.MaxValue;
+    public LocationType LocationType { get; set; }
     public DateTimeOffset CreatedDate { get; set; }
     public DateTimeOffset LastModifiedDate { get; set; }
 
-    public Location(
-        string name,
-        float longitude,
-        float latitude,
-        DateTimeOffset arriveDate,
-        LocationDateAccuracy locationDateAccuracy,
-        Guid userId)
+    public Location() { }
+
+    public static Location Create(LogCurrentLocationDTO currentLocationDto, Guid userId)
     {
-        Name = name;
-        Longitude = longitude;
-        Latitude = latitude;
-        ArriveDate = arriveDate;
-        LocationDateAccuracy = locationDateAccuracy;
-        UserId = userId;
+        return new Location()
+        {
+            Name = currentLocationDto.Name,
+            Longitude = currentLocationDto.Longitude,
+            Latitude = currentLocationDto.Latitude,
+            UserId = userId,
+            ArriveDate = DateTimeOffset.UtcNow,
+            LocationType = LocationType.VisitedLocation
+        };
     }
 
-    public Location(
-        string name,
-        float longitude,
-        float latitude,
-        DateTimeOffset arriveDate,
-        DateTimeOffset departDate,
-        LocationDateAccuracy locationDateAccuracy,
-        Guid userId) : this(
-            name,
-            longitude,
-            latitude,
-            arriveDate,
-            locationDateAccuracy,
-            userId)
+    public static Location Create(LogPlannedLocationDTO plannedLocationDto, Guid userId)
     {
-        DepartDate = departDate;
+        return new Location()
+        {
+            Name = plannedLocationDto.Name,
+            Longitude = plannedLocationDto.Longitude,
+            Latitude = plannedLocationDto.Latitude,
+            ArriveDate = plannedLocationDto.ArriveDate,
+            DepartDate = plannedLocationDto.DepartDate ?? DateTimeOffset.MaxValue,
+            LocationType = LocationType.PlannedLocation,
+            UserId = userId,
+        };
+    }
+
+    public void DepartLocation()
+    {
+        DepartDate = DateTimeOffset.UtcNow;
     }
 }
 
-public enum LocationDateAccuracy
+public enum LocationType
 {
-    Day,
-    Week,
-    Month
+    VisitedLocation,
+    PlannedLocation
 }

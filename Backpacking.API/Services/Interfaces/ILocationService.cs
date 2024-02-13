@@ -8,5 +8,7 @@ public interface ILocationService
 {
     Task<Result<Location?>> GetCurrentLocation();
     Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO);
+    Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO);
+    Task<Result<IEnumerable<Location>>> GetPlannedLocations();
     Task<Result<Location>> GetLocationById(Guid id);
 }

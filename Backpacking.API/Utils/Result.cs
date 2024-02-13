@@ -73,14 +73,12 @@ public class Result
         return Fail(new BPError(HttpStatusCode.BadRequest, ""));
     }
 
-    public static Result Guard(Func<bool> func, HttpStatusCode rootCode = HttpStatusCode.BadRequest)
+    public static Result Guard(Func<bool> func, BPError rootError)
     {
         if (func() == true)
         {
             return Ok();
         }
-
-        BPError rootError = new BPError(rootCode, "");
 
         return Fail(rootError);
     }
@@ -235,6 +233,21 @@ public static class ResultExtensions
         }
 
         return Result<TOut>.Fail(awaited.Error);
+    }
+
+    public static Result Guard(this Result result, Func<bool> func, BPError error)
+    {
+        return (func(), result.Success) switch
+        {
+            // Condition successful
+            (true, true) => Result.Ok(),
+            // Condition successful but error result
+            (true, false) => result,
+            // Condition failed and success result
+            (false, true) => error,
+            // Condition failed and error result
+            (false, false) => error,
+        };
     }
 }
 

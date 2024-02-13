@@ -59,6 +59,43 @@ public class LocationV1Controller : ControllerBase
         };
     }
 
+    [HttpGet("planned")]
+    [EndpointName(nameof(GetPlannedLocations))]
+    public async Task<IActionResult> GetPlannedLocations()
+    {
+        Result<IEnumerable<Location>> response = await _locationService.GetPlannedLocations();
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(IEnumerable<Location> locations)
+        {
+            BPApiResult<IEnumerable<LocationDTO>> apiResult =
+                new BPApiResult<IEnumerable<LocationDTO>>(
+                    locations.Select(location => new LocationDTO(location)).ToList(),
+                    1,
+                    1);
+
+            return Ok(apiResult);
+        }
+    }
+
+    [HttpPost("planned")]
+    [EndpointName(nameof(LogPlannedLocation))]
+    public async Task<IActionResult> LogPlannedLocation(LogPlannedLocationDTO location)
+    {
+        Result<Location> response = await _locationService.LogPlannedLocation(location);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
+        };
+    }
+
     [HttpGet("{id:guid}")]
     [EndpointName(nameof(GetLocationById))]
     public async Task<IActionResult> GetLocationById(Guid id)

@@ -26,8 +26,9 @@ public class UserService : IUserService
 
         if (principal is null)
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Not Found");
+            return new BPError(HttpStatusCode.Unauthorized, "Current User Claims Not Found");
         }
+
 
         BPUser? currentUser = await _userManager.GetUserAsync(principal);
 
@@ -45,7 +46,7 @@ public class UserService : IUserService
 
         if (principal is null)
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Not Found");
+            return new BPError(HttpStatusCode.Unauthorized, "Current User Claims Not Found");
         }
 
         string? currentUserId = _userManager.GetUserId(principal);
