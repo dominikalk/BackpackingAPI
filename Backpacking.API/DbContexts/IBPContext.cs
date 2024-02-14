@@ -11,6 +11,8 @@ public interface IBPContext
     DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IBPModel;
 
     DbSet<Location> Locations { get; }
+    IQueryable<Location> VisitedLocations { get; }
+    IQueryable<Location> PlannedLocations { get; }
     DbSet<BPUser> Users { get; }
 
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));

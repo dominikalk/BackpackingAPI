@@ -33,4 +33,9 @@ public class Guard
     {
         return start < end;
     }
+
+    public static bool IsBefore(DateTimeOffset start, DateTimeOffset end)
+    {
+        return start < end;
+    }
 }

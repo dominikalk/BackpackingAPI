@@ -1,4 +1,5 @@
-﻿using Backpacking.API.Utils;
+﻿using Backpacking.API.Models;
+using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -10,10 +11,10 @@ internal static class ControllerBaseExtensions
     {
         return error.Code switch
         {
-            HttpStatusCode.BadRequest => controller.BadRequest(error.Message),
-            HttpStatusCode.NotFound => controller.NotFound(error.Message),
-            HttpStatusCode.Forbidden => controller.Forbid(error.Message),
-            HttpStatusCode.Unauthorized => controller.Unauthorized(error.Message),
+            HttpStatusCode.BadRequest => controller.BadRequest(new BPApiError(error)),
+            HttpStatusCode.NotFound => controller.NotFound(new BPApiError(error)),
+            HttpStatusCode.Unauthorized => controller.Unauthorized(new BPApiError(error)),
+            HttpStatusCode.Forbidden => controller.Forbid(),
             _ => controller.StatusCode(StatusCodes.Status500InternalServerError)
         };
     }

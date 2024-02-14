@@ -21,6 +21,8 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
     public DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IBPModel => Set<TEntity>();
 
     public DbSet<Location> Locations => Set<Location>();
+    public IQueryable<Location> VisitedLocations => Locations.Where(location => location.LocationType == LocationType.VisitedLocation);
+    public IQueryable<Location> PlannedLocations => Locations.Where(location => location.LocationType == LocationType.PlannedLocation);
 
     public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)
     {

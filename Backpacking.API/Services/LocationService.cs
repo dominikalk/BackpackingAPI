@@ -23,104 +23,124 @@ public class LocationService : ILocationService
 
     public async Task<Result<Location?>> GetCurrentLocation()
     {
-        Result<Guid> currentUserId = _userService.GetCurrentUserId();
+        Result<Location?> result = await _userService.GetCurrentUserId()
+            .Then(GetCurrentLocation);
 
-        if (currentUserId.Success is false)
-        {
-            return currentUserId.Error;
-        }
-
-        return await GetUserLocationsQueryable(currentUserId.Value)
-            .Where(location =>
-                location.LocationType == LocationType.VisitedLocation &&
-                location.DepartDate > DateTimeOffset.UtcNow)
-            .OrderByDescending(location => location.ArriveDate)
-            .FirstOrDefaultAsync();
+        return result;
     }
 
     public async Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO)
     {
-        Result<Location?> oldLocation = await GetCurrentLocation();
-
-        if (!oldLocation.Success)
-        {
-            return oldLocation.Error;
-        }
-
-        oldLocation.Value?.DepartLocation();
-
-        return await _userService.GetCurrentUserId()
+        Result<Location> result = await (await GetCurrentLocation())
+            .Then(DepartLocation)
+            .Then(_userService.GetCurrentUserId)
             .Then(userId => Result<Location>.Ok(Location.Create(locationDTO, userId)))
             .Then(AddLocation)
             .Then(SaveChanges);
+
+        return result;
     }
 
     public async Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO)
     {
-        return await _userService.GetCurrentUserId()
+        Result<Location> result = await _userService.GetCurrentUserId()
             .Then(userId => Result<Location>.Ok(Location.Create(locationDTO, userId)))
+            .Then(ValidatePlannedLocation)
             .Then(AddLocation)
             .Then(SaveChanges);
+
+        return result;
     }
 
     public async Task<Result<IEnumerable<Location>>> GetPlannedLocations()
     {
-        Result<Guid> currentUserId = _userService.GetCurrentUserId();
+        Result<IEnumerable<Location>> result = await _userService.GetCurrentUserId()
+            .Then(GetPlannedLocations);
 
-        if (currentUserId.Success is false)
-        {
-            return currentUserId.Error;
-        }
-
-        return await GetUserLocationsQueryable(currentUserId.Value)
-            .Where(location =>
-                location.LocationType == LocationType.PlannedLocation
-                && location.ArriveDate > DateTimeOffset.UtcNow)
-            .OrderBy(location => location.ArriveDate)
-            .ToListAsync();
+        return result;
     }
 
     public async Task<Result<Location>> GetLocationById(Guid id)
     {
-        Result<Guid> currentUserId = _userService.GetCurrentUserId();
+        Result<Location> result = await ValidateId(id)
+            .Then(_userService.GetCurrentUserId)
+            .Then(userId => GetLocationById(id, userId))
+            .Then(location => GuardLocation(location, id));
 
-        Result guard = Result.Guard(() => Guard.IsNotEqual(id, Guid.Empty), new BPError(HttpStatusCode.BadRequest, "Invalid Id"))
-            .Guard(() => Guard.IsEqual(currentUserId.Success, true), currentUserId.Error);
+        return result;
+    }
+
+    private Result<Location> ValidatePlannedLocation(Location location)
+    {
+        Result guard = Result.Guard(() => Guard.IsBefore(DateTimeOffset.UtcNow, location.ArriveDate), new BPError(HttpStatusCode.BadRequest, "Arrive date must be in the future."))
+            .Guard(() => Guard.IsBefore(location.ArriveDate, location.DepartDate), new BPError(HttpStatusCode.BadRequest, "Arrive date must be before depart date."));
 
         if (guard.Success is false)
         {
             return guard.Error;
         }
 
-        Location? location = await GetUserLocationsQueryable(currentUserId.Value).FirstOrDefaultAsync(location => location.Id == id);
+        return location;
+    }
 
+    private async Task<Result<Location?>> GetCurrentLocation(Guid userId)
+    {
+        return await _bPContext.VisitedLocations
+           .Where(location => location.DepartDate > DateTimeOffset.UtcNow && location.UserId == userId)
+           .OrderByDescending(location => location.ArriveDate)
+           .FirstOrDefaultAsync();
+    }
+
+    private async Task<Result<IEnumerable<Location>>> GetPlannedLocations(Guid userId)
+    {
+        return await _bPContext.PlannedLocations
+            .Where(location => location.ArriveDate > DateTimeOffset.UtcNow && location.UserId == userId)
+            .OrderBy(location => location.ArriveDate)
+            .ToListAsync();
+    }
+
+    private async Task<Result<Location?>> GetLocationById(Guid id, Guid userId)
+    {
+        return await _bPContext.Locations
+            .Where(location => location.Id == id && location.UserId == userId)
+            .FirstOrDefaultAsync();
+    }
+
+    private Result<Guid> ValidateId(Guid id)
+    {
+        if (id == default)
+        {
+            return new BPError(HttpStatusCode.BadRequest, "Invalid Id");
+        }
+
+        return id;
+    }
+
+    private Result<Location> GuardLocation(Location? location, Guid locationId)
+    {
         if (location is null)
         {
-            return new BPError(HttpStatusCode.NotFound, $"Location with id: '{id}' does not exist.");
+            return new BPError(HttpStatusCode.NotFound, $"Location with id: '{locationId}' does not exist.");
         }
 
         return location;
     }
 
-    //private Result ValidateLogLocationDto(LogPlannedLocationDTO logLocation)
-    //{
-    //    return Result.Guard(() => Guard.IsBefore(DateOnly.FromDateTime(DateTimeOffset.UtcNow), logLocation.ArriveDate), new BPError(HttpStatusCode.BadRequest, "Name is required"));
-    //}
-
-    private IQueryable<Location> GetUserLocationsQueryable(Guid userId)
+    private Result<Location?> DepartLocation(Location? location)
     {
-        return _bPContext.Locations.Where(location => location.UserId == userId);
+        location?.DepartLocation();
+        return location;
     }
 
     private Result<Location> AddLocation(Location location)
     {
         _bPContext.Locations.Add(location);
-        return Result<Location>.Ok(location);
+        return location;
     }
 
     private async Task<Result<Location>> SaveChanges(Location location)
     {
         await _bPContext.SaveChangesAsync();
-        return Result<Location>.Ok(location);
+        return location;
     }
 }

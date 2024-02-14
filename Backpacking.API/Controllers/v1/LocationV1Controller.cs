@@ -4,7 +4,6 @@ using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Backpacking.API.Controllers;
 
@@ -55,7 +54,7 @@ public class LocationV1Controller : ControllerBase
             BPApiResult<LocationDTO> apiResult =
                 new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
 
-            return Ok(apiResult);
+            return CreatedAtAction(nameof(GetLocationById), new { id = location.Id }, apiResult);
         };
     }
 
@@ -92,7 +91,7 @@ public class LocationV1Controller : ControllerBase
             BPApiResult<LocationDTO> apiResult =
                 new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
 
-            return Ok(apiResult);
+            return CreatedAtAction(nameof(GetLocationById), new { id = location.Id }, apiResult);
         };
     }
 

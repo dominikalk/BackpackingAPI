@@ -22,14 +22,31 @@ public class UserService : IUserService
 
     public async Task<Result<BPUser>> GetCurrentUser()
     {
-        ClaimsPrincipal? principal = _httpContextAccessor.HttpContext?.User;
+        return await GetClaimsPrinciple()
+            .Then(GetUser);
+    }
 
-        if (principal is null)
+    public Result<Guid> GetCurrentUserId()
+    {
+        return GetClaimsPrinciple()
+            .Then(GetUserId)
+            .Then(ParseId);
+    }
+
+    private Result<ClaimsPrincipal> GetClaimsPrinciple()
+    {
+        ClaimsPrincipal? claimsPrincipal = _httpContextAccessor.HttpContext?.User;
+
+        if (claimsPrincipal is null)
         {
             return new BPError(HttpStatusCode.Unauthorized, "Current User Claims Not Found");
         }
 
+        return claimsPrincipal;
+    }
 
+    private async Task<Result<BPUser>> GetUser(ClaimsPrincipal principal)
+    {
         BPUser? currentUser = await _userManager.GetUserAsync(principal);
 
         if (currentUser is null)
@@ -40,22 +57,25 @@ public class UserService : IUserService
         return currentUser;
     }
 
-    public Result<Guid> GetCurrentUserId()
+    private Result<string> GetUserId(ClaimsPrincipal principal)
     {
-        ClaimsPrincipal? principal = _httpContextAccessor.HttpContext?.User;
+        string? userId = _userManager.GetUserId(principal);
 
-        if (principal is null)
-        {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Claims Not Found");
-        }
-
-        string? currentUserId = _userManager.GetUserId(principal);
-
-        if (currentUserId is null)
+        if (userId is null)
         {
             return new BPError(HttpStatusCode.Unauthorized, "Current User Id Not Found");
         }
 
-        return Guid.Parse(currentUserId);
+        return userId;
+    }
+
+    private Result<Guid> ParseId(string id)
+    {
+        if (!Guid.TryParse(id, out Guid parsedGuid))
+        {
+            return new BPError(HttpStatusCode.Unauthorized, "Current User Id Invalid");
+        }
+
+        return parsedGuid;
     }
 }
