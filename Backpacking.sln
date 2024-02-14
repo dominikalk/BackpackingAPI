@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backpacking.API", "Backpacking.API\Backpacking.API.csproj", "{56DA9A00-7E0C-42B7-8582-2013A66349A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backpacking.API", "Backpacking.API\Backpacking.API.csproj", "{56DA9A00-7E0C-42B7-8582-2013A66349A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backpacking.API.Tests", "Backpacking.API.Tests\Backpacking.API.Tests.csproj", "{93AF2F21-D633-486C-81CE-43FE2F3EC1A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{56DA9A00-7E0C-42B7-8582-2013A66349A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56DA9A00-7E0C-42B7-8582-2013A66349A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56DA9A00-7E0C-42B7-8582-2013A66349A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93AF2F21-D633-486C-81CE-43FE2F3EC1A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93AF2F21-D633-486C-81CE-43FE2F3EC1A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93AF2F21-D633-486C-81CE-43FE2F3EC1A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93AF2F21-D633-486C-81CE-43FE2F3EC1A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

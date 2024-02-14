@@ -1,6 +1,6 @@
 ﻿using Backpacking.API.DbContexts;
 using Backpacking.API.Models;
-using Backpacking.API.Models.DTO;
+using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -72,8 +72,8 @@ public class LocationService : ILocationService
 
     private Result<Location> ValidatePlannedLocation(Location location)
     {
-        Result guard = Result.Guard(() => Guard.IsBefore(DateTimeOffset.UtcNow, location.ArriveDate), new BPError(HttpStatusCode.BadRequest, "Arrive date must be in the future."))
-            .Guard(() => Guard.IsBefore(location.ArriveDate, location.DepartDate), new BPError(HttpStatusCode.BadRequest, "Arrive date must be before depart date."));
+        Result guard = Result.Guard(() => Guard.IsBefore(DateTimeOffset.UtcNow, location.ArriveDate), Location.Errors.ArriveDateFuture)
+            .Guard(() => Guard.IsBefore(location.ArriveDate, location.DepartDate), Location.Errors.ArriveBeforeDepart);
 
         if (guard.Success is false)
         {
@@ -110,7 +110,7 @@ public class LocationService : ILocationService
     {
         if (id == default)
         {
-            return new BPError(HttpStatusCode.BadRequest, "Invalid Id");
+            return Location.Errors.InvalidId;
         }
 
         return id;

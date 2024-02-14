@@ -1,5 +1,5 @@
 ﻿using Backpacking.API.Models;
-using Backpacking.API.Models.DTO;
+using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;

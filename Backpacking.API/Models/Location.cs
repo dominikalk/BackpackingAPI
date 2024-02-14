@@ -1,4 +1,6 @@
-﻿using Backpacking.API.Models.DTO;
+﻿using Backpacking.API.Models.DTO.LocationDTOs;
+using Backpacking.API.Utils;
+using System.Net;
 
 namespace Backpacking.API.Models;
 
@@ -48,6 +50,13 @@ public class Location : IBPModel
     public void DepartLocation()
     {
         DepartDate = DateTimeOffset.UtcNow;
+    }
+
+    public class Errors
+    {
+        public static BPError InvalidId = new BPError(HttpStatusCode.BadRequest, "Invalid Id");
+        public static BPError ArriveDateFuture = new BPError(HttpStatusCode.BadRequest, "Arrive date must be in the future.");
+        public static BPError ArriveBeforeDepart = new BPError(HttpStatusCode.BadRequest, "Arrive date must be before depart date.");
     }
 }
 

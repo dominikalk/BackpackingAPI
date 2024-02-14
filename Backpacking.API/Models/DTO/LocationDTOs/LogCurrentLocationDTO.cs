@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Backpacking.API.Models.DTO;
+namespace Backpacking.API.Models.DTO.LocationDTOs;
 
 public class LogCurrentLocationDTO
 {

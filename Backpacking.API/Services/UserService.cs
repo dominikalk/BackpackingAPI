@@ -39,7 +39,7 @@ public class UserService : IUserService
 
         if (claimsPrincipal is null)
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Claims Not Found");
+            return BPUser.Errors.ClaimsNotFound;
         }
 
         return claimsPrincipal;
@@ -51,7 +51,7 @@ public class UserService : IUserService
 
         if (currentUser is null)
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Not Found");
+            return BPUser.Errors.UserNotFound;
         }
 
         return currentUser;
@@ -63,7 +63,7 @@ public class UserService : IUserService
 
         if (userId is null)
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Id Not Found");
+            return BPUser.Errors.UserIdNotFound;
         }
 
         return userId;
@@ -73,7 +73,7 @@ public class UserService : IUserService
     {
         if (!Guid.TryParse(id, out Guid parsedGuid))
         {
-            return new BPError(HttpStatusCode.Unauthorized, "Current User Id Invalid");
+            return BPUser.Errors.UserIdInvalid;
         }
 
         return parsedGuid;
