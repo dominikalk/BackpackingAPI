@@ -30,11 +30,10 @@ public class LocationService : ILocationService
             return currentUserId.Error;
         }
 
-        return await _bPContext.Locations
+        return await GetUserLocationsQueryable(currentUserId.Value)
             .Where(location =>
                 location.LocationType == LocationType.VisitedLocation &&
-                location.DepartDate > DateTimeOffset.UtcNow
-                && location.UserId == currentUserId.Value)
+                location.DepartDate > DateTimeOffset.UtcNow)
             .OrderByDescending(location => location.ArriveDate)
             .FirstOrDefaultAsync();
     }
@@ -73,10 +72,9 @@ public class LocationService : ILocationService
             return currentUserId.Error;
         }
 
-        return await _bPContext.Locations
+        return await GetUserLocationsQueryable(currentUserId.Value)
             .Where(location =>
-                location.UserId == currentUserId.Value
-                && location.LocationType == LocationType.PlannedLocation
+                location.LocationType == LocationType.PlannedLocation
                 && location.ArriveDate > DateTimeOffset.UtcNow)
             .OrderBy(location => location.ArriveDate)
             .ToListAsync();
@@ -94,7 +92,7 @@ public class LocationService : ILocationService
             return guard.Error;
         }
 
-        Location? location = await _bPContext.Locations.FirstOrDefaultAsync(location => location.Id == id);
+        Location? location = await GetUserLocationsQueryable(currentUserId.Value).FirstOrDefaultAsync(location => location.Id == id);
 
         if (location is null)
         {
@@ -102,6 +100,16 @@ public class LocationService : ILocationService
         }
 
         return location;
+    }
+
+    //private Result ValidateLogLocationDto(LogPlannedLocationDTO logLocation)
+    //{
+    //    return Result.Guard(() => Guard.IsBefore(DateOnly.FromDateTime(DateTimeOffset.UtcNow), logLocation.ArriveDate), new BPError(HttpStatusCode.BadRequest, "Name is required"));
+    //}
+
+    private IQueryable<Location> GetUserLocationsQueryable(Guid userId)
+    {
+        return _bPContext.Locations.Where(location => location.UserId == userId);
     }
 
     private Result<Location> AddLocation(Location location)

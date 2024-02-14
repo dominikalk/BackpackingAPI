@@ -26,15 +26,15 @@ public class LocationV1Controller : ControllerBase
     {
         Result<Location?> response = await _locationService.GetCurrentLocation();
 
-        if (response.Success && response.Value is null)
-        {
-            response = new BPError(HttpStatusCode.NotFound, "No current location exists.");
-        }
+        return response.Finally(HandleSuccess, this.HandleError);
 
-        return response.Finally(HandleSuccess!, this.HandleError);
-
-        IActionResult HandleSuccess(Location location)
+        IActionResult HandleSuccess(Location? location)
         {
+            if (location is null)
+            {
+                return Ok(new BPApiResult<LocationDTO?>(null, 0, 0));
+            }
+
             BPApiResult<LocationDTO> apiResult =
                 new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
 
@@ -72,7 +72,7 @@ public class LocationV1Controller : ControllerBase
             BPApiResult<IEnumerable<LocationDTO>> apiResult =
                 new BPApiResult<IEnumerable<LocationDTO>>(
                     locations.Select(location => new LocationDTO(location)).ToList(),
-                    1,
+                    locations.Count(),
                     1);
 
             return Ok(apiResult);

@@ -6,11 +6,11 @@ public class LogCurrentLocationDTO
 {
     [Required]
     [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; set; } = string.Empty;
 
     [Required]
-    public float Longitude { get; set; }
+    public required float Longitude { get; set; }
 
     [Required]
-    public float Latitude { get; set; }
+    public required float Latitude { get; set; }
 }

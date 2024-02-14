@@ -6,16 +6,16 @@ public class LogPlannedLocationDTO
 {
     [Required]
     [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
+    public required string Name { get; set; } = string.Empty;
 
     [Required]
-    public float Longitude { get; set; }
+    public required float Longitude { get; set; }
 
     [Required]
-    public float Latitude { get; set; }
+    public required float Latitude { get; set; }
 
     [Required]
-    public DateTimeOffset ArriveDate { get; set; }
+    public required DateTimeOffset ArriveDate { get; set; }
 
     public DateTimeOffset? DepartDate { get; set; }
 }
