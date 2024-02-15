@@ -32,13 +32,21 @@ public class LocationService : ILocationService
     public async Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO)
     {
         Result<Location> result = await (await GetCurrentLocation())
-            .Then(DepartLocation)
+            .Then(OptionalDepartLocation)
             .Then(_userService.GetCurrentUserId)
             .Then(userId => Result<Location>.Ok(Location.Create(locationDTO, userId)))
             .Then(AddLocation)
             .Then(SaveChanges);
 
         return result;
+    }
+
+    public async Task<Result<Location>> DepartCurrentLocation()
+    {
+        return await (await GetCurrentLocation())
+            .Then(GuardLocation)
+            .Then(DepartLocation)
+            .Then(SaveChanges);
     }
 
     public async Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO)
@@ -85,16 +93,22 @@ public class LocationService : ILocationService
 
     private async Task<Result<Location?>> GetCurrentLocation(Guid userId)
     {
-        return await _bPContext.VisitedLocations
-           .Where(location => location.DepartDate > DateTimeOffset.UtcNow && location.UserId == userId)
+        return await _bPContext.Locations
+           .Where(location =>
+                location.DepartDate > DateTimeOffset.UtcNow
+                && location.UserId == userId
+                && location.LocationType == LocationType.VisitedLocation)
            .OrderByDescending(location => location.ArriveDate)
            .FirstOrDefaultAsync();
     }
 
     private async Task<Result<IEnumerable<Location>>> GetPlannedLocations(Guid userId)
     {
-        return await _bPContext.PlannedLocations
-            .Where(location => location.ArriveDate > DateTimeOffset.UtcNow && location.UserId == userId)
+        return await _bPContext.Locations
+            .Where(location =>
+                location.DepartDate > DateTimeOffset.UtcNow
+                && location.UserId == userId
+                && location.LocationType == LocationType.PlannedLocation)
             .OrderBy(location => location.ArriveDate)
             .ToListAsync();
     }
@@ -116,6 +130,16 @@ public class LocationService : ILocationService
         return id;
     }
 
+    private Result<Location> GuardLocation(Location? location)
+    {
+        if (location is null)
+        {
+            return Location.Errors.LocationNotFound;
+        }
+
+        return location;
+    }
+
     private Result<Location> GuardLocation(Location? location, Guid locationId)
     {
         if (location is null)
@@ -126,7 +150,13 @@ public class LocationService : ILocationService
         return location;
     }
 
-    private Result<Location?> DepartLocation(Location? location)
+    private Result<Location> DepartLocation(Location location)
+    {
+        location.DepartLocation();
+        return location;
+    }
+
+    private Result<Location?> OptionalDepartLocation(Location? location)
     {
         location?.DepartLocation();
         return location;

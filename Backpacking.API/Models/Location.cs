@@ -57,6 +57,7 @@ public class Location : IBPModel
         public static BPError InvalidId = new BPError(HttpStatusCode.BadRequest, "Invalid Id");
         public static BPError ArriveDateFuture = new BPError(HttpStatusCode.BadRequest, "Arrive date must be in the future.");
         public static BPError ArriveBeforeDepart = new BPError(HttpStatusCode.BadRequest, "Arrive date must be before depart date.");
+        public static BPError LocationNotFound = new BPError(HttpStatusCode.NotFound, "Location not found.");
     }
 }
 

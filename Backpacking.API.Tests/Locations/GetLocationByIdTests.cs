@@ -1,4 +1,5 @@
-﻿using Backpacking.API.DbContexts;
+﻿using Autofac.Extras.Moq;
+using Backpacking.API.DbContexts;
 using Backpacking.API.Models;
 using Backpacking.API.Services;
 using Backpacking.API.Services.Interfaces;
@@ -12,18 +13,25 @@ namespace Backpacking.API.Tests.Locations;
 [TestClass]
 public class GetLocationByIdTests
 {
-    private readonly ILocationService _locationService;
+    private readonly AutoMock _mock = AutoMock.GetLoose();
 
-    private readonly Guid _userId = Guid.NewGuid();
-    private readonly Location _location;
-    private readonly Location _unownedLocation;
+    private Location _location = new Mock<Location>().Object;
+    private Location _unownedLocation = new Mock<Location>().Object;
 
     public GetLocationByIdTests()
     {
+        _mock = AutoMock.GetLoose();
+    }
+
+    [TestInitialize]
+    public void Setup()
+    {
+        Guid userId = Guid.NewGuid();
+
         _location = new Location()
         {
             Id = Guid.NewGuid(),
-            UserId = _userId,
+            UserId = userId,
         };
 
         _unownedLocation = new Location()
@@ -32,28 +40,24 @@ public class GetLocationByIdTests
             UserId = Guid.NewGuid(),
         };
 
-        Mock<IUserService> userServiceMock = new Mock<IUserService>();
-        Mock<IBPContext> bPContextMock = new Mock<IBPContext>();
-
-        userServiceMock
+        _mock.Mock<IUserService>()
             .Setup(service => service.GetCurrentUserId())
-            .Returns(Result<Guid>.Ok(_userId));
+            .Returns(Result<Guid>.Ok(userId));
 
-        bPContextMock
+        _mock.Mock<IBPContext>()
             .Setup(context => context.Locations)
             .ReturnsDbSet(new List<Location> { _location, _unownedLocation });
-
-        _locationService = new LocationService(bPContextMock.Object, userServiceMock.Object);
     }
 
     [TestMethod("[GetLocationById] Invalid Id")]
     public async Task GetLocationById_InvalidId()
     {
         // Arrange
+        LocationService locationService = _mock.Create<LocationService>();
         Guid id = Guid.Empty;
 
         // Act
-        Result<Location> result = await _locationService.GetLocationById(id);
+        Result<Location> result = await locationService.GetLocationById(id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -64,10 +68,11 @@ public class GetLocationByIdTests
     public async Task GetLocationById_LocationNotFound()
     {
         // Arrange
+        LocationService locationService = _mock.Create<LocationService>();
         Guid id = Guid.NewGuid();
 
         // Act
-        Result<Location> result = await _locationService.GetLocationById(id);
+        Result<Location> result = await locationService.GetLocationById(id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -77,8 +82,11 @@ public class GetLocationByIdTests
     [TestMethod("[GetLocationById] Location Not Owned By User")]
     public async Task GetLocationById_LocationNotOwnedByUser()
     {
+        // Arrange
+        LocationService locationService = _mock.Create<LocationService>();
+
         // Act
-        Result<Location> result = await _locationService.GetLocationById(_unownedLocation.Id);
+        Result<Location> result = await locationService.GetLocationById(_unownedLocation.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -88,8 +96,11 @@ public class GetLocationByIdTests
     [TestMethod("[GetLocationById] Success")]
     public async Task GetLocationById_Success()
     {
+        // Arrange
+        LocationService locationService = _mock.Create<LocationService>();
+
         // Act
-        Result<Location> result = await _locationService.GetLocationById(_location.Id);
+        Result<Location> result = await locationService.GetLocationById(_location.Id);
 
         // Assert
         Assert.IsTrue(result.Success);

@@ -4,6 +4,7 @@ using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Backpacking.API.Controllers;
 
@@ -55,6 +56,23 @@ public class LocationV1Controller : ControllerBase
                 new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
 
             return CreatedAtAction(nameof(GetLocationById), new { id = location.Id }, apiResult);
+        };
+    }
+
+    [HttpPatch("depart")]
+    [EndpointName(nameof(DepartCurrentLocation))]
+    public async Task<IActionResult> DepartCurrentLocation()
+    {
+        Result<Location> response = await _locationService.DepartCurrentLocation();
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
         };
     }
 
