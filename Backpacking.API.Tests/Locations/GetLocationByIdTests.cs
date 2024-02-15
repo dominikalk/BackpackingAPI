@@ -16,18 +16,20 @@ public class GetLocationByIdTests
 
     private readonly Guid _userId = Guid.NewGuid();
     private readonly Location _location;
+    private readonly Location _unownedLocation;
 
     public GetLocationByIdTests()
     {
         _location = new Location()
         {
             Id = Guid.NewGuid(),
-            Name = "",
-            Longitude = 0,
-            Latitude = 0,
             UserId = _userId,
-            ArriveDate = DateTimeOffset.UtcNow,
-            DepartDate = DateTimeOffset.UtcNow,
+        };
+
+        _unownedLocation = new Location()
+        {
+            Id = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
         };
 
         Mock<IUserService> userServiceMock = new Mock<IUserService>();
@@ -39,7 +41,7 @@ public class GetLocationByIdTests
 
         bPContextMock
             .Setup(context => context.Locations)
-            .ReturnsDbSet(new List<Location> { _location });
+            .ReturnsDbSet(new List<Location> { _location, _unownedLocation });
 
         _locationService = new LocationService(bPContextMock.Object, userServiceMock.Object);
     }
@@ -66,6 +68,17 @@ public class GetLocationByIdTests
 
         // Act
         Result<Location> result = await _locationService.GetLocationById(id);
+
+        // Assert
+        Assert.IsFalse(result.Success);
+        Assert.AreEqual(HttpStatusCode.NotFound, result.Error.Code);
+    }
+
+    [TestMethod("[GetLocationById] Location Not Owned By User")]
+    public async Task GetLocationById_LocationNotOwnedByUser()
+    {
+        // Act
+        Result<Location> result = await _locationService.GetLocationById(_unownedLocation.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
