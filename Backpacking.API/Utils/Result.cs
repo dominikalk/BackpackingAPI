@@ -147,6 +147,13 @@ public class Result<TObject> : Result
             false => Result<TOut>.Fail(_error)
         };
 
+    public Result Then(Func<TObject, Result> next)
+        => Success switch
+        {
+            true => next(_value),
+            false => Result.Fail(_error)
+        };
+
     public TResult Finally<TResult>(Func<TObject, TResult> some, Func<BPError, TResult> none)
         => Success switch
         {
@@ -211,6 +218,16 @@ public static class ResultExtensions
         result.Finally(some, none);
 
         return result;
+    }
+
+    public static Result Then<TData>(this Result<TData> result, Func<Result> func)
+    {
+        if (result.Success)
+        {
+            return func();
+        }
+
+        return Result.Fail(result.Error);
     }
 
     public static async Task<Result<TOut>> Then<TOut>(this Result result, Func<Task<Result<TOut>>> func)

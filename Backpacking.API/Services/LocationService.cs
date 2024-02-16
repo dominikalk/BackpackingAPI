@@ -1,5 +1,6 @@
 ﻿using Backpacking.API.DbContexts;
 using Backpacking.API.Models;
+using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
@@ -60,10 +61,10 @@ public class LocationService : ILocationService
         return result;
     }
 
-    public async Task<Result<IEnumerable<Location>>> GetPlannedLocations()
+    public async Task<Result<PagedList<Location>>> GetPlannedLocations(BPPagingParameters pagingParameters)
     {
-        Result<IEnumerable<Location>> result = await _userService.GetCurrentUserId()
-            .Then(GetPlannedLocations);
+        Result<PagedList<Location>> result = await _userService.GetCurrentUserId()
+            .Then(userId => GetPlannedLocations(userId, pagingParameters));
 
         return result;
     }
@@ -76,6 +77,13 @@ public class LocationService : ILocationService
             .Then(location => GuardLocation(location, id));
 
         return result;
+    }
+
+    public async Task<Result> DeleteLocationById(Guid id)
+    {
+        return await (await GetLocationById(id))
+            .Then(DeleteLocation)
+            .Then(SaveChanges);
     }
 
     private Result<Location> ValidatePlannedLocation(Location location)
@@ -102,7 +110,7 @@ public class LocationService : ILocationService
            .FirstOrDefaultAsync();
     }
 
-    private async Task<Result<IEnumerable<Location>>> GetPlannedLocations(Guid userId)
+    private async Task<Result<PagedList<Location>>> GetPlannedLocations(Guid userId, BPPagingParameters pagingParameters)
     {
         return await _bPContext.Locations
             .Where(location =>
@@ -110,7 +118,7 @@ public class LocationService : ILocationService
                 && location.UserId == userId
                 && location.LocationType == LocationType.PlannedLocation)
             .OrderBy(location => location.ArriveDate)
-            .ToListAsync();
+            .ToPagedListAsync(pagingParameters);
     }
 
     private async Task<Result<Location?>> GetLocationById(Guid id, Guid userId)
@@ -168,9 +176,21 @@ public class LocationService : ILocationService
         return location;
     }
 
+    private Result DeleteLocation(Location location)
+    {
+        _bPContext.Locations.Remove(location);
+        return Result.Ok();
+    }
+
     private async Task<Result<Location>> SaveChanges(Location location)
     {
         await _bPContext.SaveChangesAsync();
         return location;
+    }
+
+    private async Task<Result> SaveChanges()
+    {
+        await _bPContext.SaveChangesAsync();
+        return Result.Ok();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Backpacking.API.Models;
+using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Utils;
 
@@ -10,6 +11,7 @@ public interface ILocationService
     Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO);
     Task<Result<Location>> DepartCurrentLocation();
     Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO);
-    Task<Result<IEnumerable<Location>>> GetPlannedLocations();
+    Task<Result<PagedList<Location>>> GetPlannedLocations(BPPagingParameters pagingParameters);
     Task<Result<Location>> GetLocationById(Guid id);
+    Task<Result> DeleteLocationById(Guid id);
 }

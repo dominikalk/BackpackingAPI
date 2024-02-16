@@ -1,4 +1,4 @@
-﻿namespace Backpacking.API.Models;
+﻿namespace Backpacking.API.Models.API;
 
 public class BPApiResult<TData>
 {

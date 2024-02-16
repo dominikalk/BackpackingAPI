@@ -1,6 +1,6 @@
 ﻿using Backpacking.API.Utils;
 
-namespace Backpacking.API.Models;
+namespace Backpacking.API.Models.API;
 
 public class BPApiError
 {

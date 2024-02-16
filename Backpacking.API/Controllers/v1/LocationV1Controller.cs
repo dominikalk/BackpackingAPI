@@ -1,10 +1,10 @@
 ﻿using Backpacking.API.Models;
+using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Backpacking.API.Controllers;
 
@@ -78,21 +78,20 @@ public class LocationV1Controller : ControllerBase
 
     [HttpGet("planned")]
     [EndpointName(nameof(GetPlannedLocations))]
-    public async Task<IActionResult> GetPlannedLocations()
+    public async Task<IActionResult> GetPlannedLocations([FromQuery] BPPagingParameters pagingParameters)
     {
-        Result<IEnumerable<Location>> response = await _locationService.GetPlannedLocations();
+        Result<PagedList<Location>> response = await _locationService.GetPlannedLocations(pagingParameters);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
-        IActionResult HandleSuccess(IEnumerable<Location> locations)
+        IActionResult HandleSuccess(PagedList<Location> pagedLocations)
         {
-            BPApiResult<IEnumerable<LocationDTO>> apiResult =
-                new BPApiResult<IEnumerable<LocationDTO>>(
-                    locations.Select(location => new LocationDTO(location)).ToList(),
-                    locations.Count(),
-                    1);
+            IEnumerable<LocationDTO> locationDtos = pagedLocations.Select(location => new LocationDTO(location));
 
-            return Ok(apiResult);
+            BPPagedApiResult<LocationDTO> pagedApiResult =
+                new BPPagedApiResult<LocationDTO>(locationDtos, pagedLocations.ToDetails());
+
+            return Ok(pagedApiResult);
         }
     }
 
@@ -128,6 +127,20 @@ public class LocationV1Controller : ControllerBase
                 new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
 
             return Ok(apiResult);
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    [EndpointName(nameof(DeleteLocationById))]
+    public async Task<IActionResult> DeleteLocationById(Guid id)
+    {
+        Result response = await _locationService.DeleteLocationById(id);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess()
+        {
+            return NoContent();
         }
     }
 }

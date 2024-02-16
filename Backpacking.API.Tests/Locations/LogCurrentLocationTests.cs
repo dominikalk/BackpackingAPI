@@ -4,7 +4,6 @@ using Backpacking.API.Models;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Services;
 using Backpacking.API.Utils;
-using Moq;
 using Moq.EntityFrameworkCore;
 using Backpacking.API.Models.DTO.LocationDTOs;
 

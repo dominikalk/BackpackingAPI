@@ -2,7 +2,6 @@
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Identity;
-using System.Net;
 using System.Security.Claims;
 
 namespace Backpacking.API.Services;

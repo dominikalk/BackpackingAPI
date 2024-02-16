@@ -6,6 +6,7 @@ using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 using Moq;
+using Backpacking.API.Models.API;
 
 namespace Backpacking.API.Tests.Locations;
 
@@ -18,6 +19,7 @@ public class GetPlannedLocationsTests
     private Location _pastLocation = new Mock<Location>().Object;
     private Location _visitedLocation = new Mock<Location>().Object;
     private Location _plannedLocation = new Mock<Location>().Object;
+    BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
 
 
     public GetPlannedLocationsTests()
@@ -73,6 +75,12 @@ public class GetPlannedLocationsTests
         _mock.Mock<IBPContext>()
             .Setup(context => context.Locations)
             .ReturnsDbSet(new List<Location>());
+
+        _pagingParameters = new BPPagingParameters()
+        {
+            PageNumber = 1,
+            PageSize = 10,
+        };
     }
 
     [TestMethod("[GetPlannedLocations] UnownedLocation")]
@@ -88,7 +96,7 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<IEnumerable<Location>> result = await locationService.GetPlannedLocations();
+        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -108,7 +116,7 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<IEnumerable<Location>> result = await locationService.GetPlannedLocations();
+        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -128,7 +136,7 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<IEnumerable<Location>> result = await locationService.GetPlannedLocations();
+        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -155,7 +163,7 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<IEnumerable<Location>> result = await locationService.GetPlannedLocations();
+        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

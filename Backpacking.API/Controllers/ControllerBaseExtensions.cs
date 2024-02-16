@@ -1,4 +1,4 @@
-﻿using Backpacking.API.Models;
+﻿using Backpacking.API.Models.API;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
