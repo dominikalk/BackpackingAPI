@@ -38,7 +38,7 @@ public class LogPlannedLocationTests
             .ReturnsAsync(Result.Ok());
     }
 
-    [TestMethod("[LogPlannedLocation] ArriveInPast")]
+    [TestMethod("[LogPlannedLocation] Arrive In Past")]
     public async Task LogPlannedLocation_ArriveInPast()
     {
         // Arrange
@@ -59,7 +59,7 @@ public class LogPlannedLocationTests
         Assert.AreEqual(Location.Errors.ArriveDateFuture, result.Error);
     }
 
-    [TestMethod("[LogPlannedLocation] DepartBeforeArrive")]
+    [TestMethod("[LogPlannedLocation] Depart Before Arrive")]
     public async Task LogPlannedLocation_DepartBeforeArrive()
     {
         // Arrange
@@ -81,7 +81,7 @@ public class LogPlannedLocationTests
         Assert.AreEqual(Location.Errors.ArriveBeforeDepart, result.Error);
     }
 
-    [TestMethod("[LogPlannedLocation] SuccessNoDepart")]
+    [TestMethod("[LogPlannedLocation] Success No Depart")]
     public async Task LogPlannedLocation_SuccessNoDepart()
     {
         // Arrange
@@ -101,7 +101,7 @@ public class LogPlannedLocationTests
         Assert.IsTrue(result.Success);
     }
 
-    [TestMethod("[LogPlannedLocation] SuccessWithDepart")]
+    [TestMethod("[LogPlannedLocation] Success With Depart")]
     public async Task LogPlannedLocation_SuccessWithDepart()
     {
         // Arrange

@@ -17,5 +17,5 @@ public class UpdatePlannedLocationDTO
     [Required]
     public required DateTimeOffset ArriveDate { get; set; }
 
-    public DateTimeOffset? DepartDate { get; set; } = DateTimeOffset.MaxValue;
+    public DateTimeOffset DepartDate { get; set; } = DateTimeOffset.MaxValue;
 }

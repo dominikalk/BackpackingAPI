@@ -43,7 +43,7 @@ public class DepartCurrentLocationTests
             .ReturnsDbSet(new List<Location>());
     }
 
-    [TestMethod("[DepartCurrentLocation] NoCurrentLocation")]
+    [TestMethod("[DepartCurrentLocation] No Current Location")]
     public async Task DepartCurrentLocation_NoCurrentLocation()
     {
         // Arrange

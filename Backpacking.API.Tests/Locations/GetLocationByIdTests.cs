@@ -76,7 +76,7 @@ public class GetLocationByIdTests
 
         // Assert
         Assert.IsFalse(result.Success);
-        Assert.AreEqual(HttpStatusCode.NotFound, result.Error.Code);
+        Assert.AreEqual(Location.Errors.LocationNotFound, result.Error);
     }
 
     [TestMethod("[GetLocationById] Location Not Owned By User")]
@@ -90,7 +90,7 @@ public class GetLocationByIdTests
 
         // Assert
         Assert.IsFalse(result.Success);
-        Assert.AreEqual(HttpStatusCode.NotFound, result.Error.Code);
+        Assert.AreEqual(Location.Errors.LocationNotFound, result.Error);
     }
 
     [TestMethod("[GetLocationById] Success")]

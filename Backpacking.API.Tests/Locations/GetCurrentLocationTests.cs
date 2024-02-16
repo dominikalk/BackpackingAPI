@@ -74,7 +74,7 @@ public class GetCurrentLocationTests
             .ReturnsDbSet(new List<Location>());
     }
 
-    [TestMethod("[GetCurrentLocation] NoLocations")]
+    [TestMethod("[GetCurrentLocation] No Locations")]
     public async Task GetCurrentLocation_NoLocations()
     {
         // Arrange
@@ -88,7 +88,7 @@ public class GetCurrentLocationTests
         Assert.AreEqual(null, result.Value);
     }
 
-    [TestMethod("[GetCurrentLocation] NoOwnedLocations")]
+    [TestMethod("[GetCurrentLocation] No Owned Locations")]
     public async Task GetCurrentLocation_NoOwnedLocations()
     {
         // Arrange
@@ -106,7 +106,7 @@ public class GetCurrentLocationTests
         Assert.AreEqual(null, result.Value);
     }
 
-    [TestMethod("[GetCurrentLocation] LocationInPast")]
+    [TestMethod("[GetCurrentLocation] Location In Past")]
     public async Task GetCurrentLocation_LocationInPast()
     {
         // Arrange
@@ -124,7 +124,7 @@ public class GetCurrentLocationTests
         Assert.AreEqual(null, result.Value);
     }
 
-    [TestMethod("[GetCurrentLocation] CurrentPlannedLocation")]
+    [TestMethod("[GetCurrentLocation] Current Planned Location")]
     public async Task GetCurrentLocation_CurrentPlannedLocation()
     {
         // Arrange
@@ -143,7 +143,7 @@ public class GetCurrentLocationTests
     }
 
 
-    [TestMethod("[GetCurrentLocation] CurrentLocationExists")]
+    [TestMethod("[GetCurrentLocation] Current Location Exists")]
     public async Task GetCurrentLocation_CurrentLocationExists()
     {
         // Arrange

@@ -11,18 +11,17 @@ using Backpacking.API.Models.API;
 namespace Backpacking.API.Tests.Locations;
 
 [TestClass]
-public class GetPlannedLocationsTests
+public class GetVisitedLocationsTests
 {
     private readonly AutoMock _mock = AutoMock.GetLoose();
 
     private Location _unownedLocation = new Mock<Location>().Object;
-    private Location _pastLocation = new Mock<Location>().Object;
-    private Location _visitedLocation = new Mock<Location>().Object;
     private Location _plannedLocation = new Mock<Location>().Object;
+    private Location _visitedLocation = new Mock<Location>().Object;
     BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
 
 
-    public GetPlannedLocationsTests()
+    public GetVisitedLocationsTests()
     {
         _mock = AutoMock.GetLoose();
     }
@@ -38,24 +37,6 @@ public class GetPlannedLocationsTests
             UserId = Guid.NewGuid(),
             ArriveDate = DateTimeOffset.UtcNow.AddDays(-1),
             DepartDate = DateTimeOffset.UtcNow.AddDays(1),
-            LocationType = LocationType.PlannedLocation
-        };
-
-        _pastLocation = new Location()
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            ArriveDate = DateTimeOffset.UtcNow.AddDays(-2),
-            DepartDate = DateTimeOffset.UtcNow.AddDays(-1),
-            LocationType = LocationType.PlannedLocation
-        };
-
-        _visitedLocation = new Location()
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            ArriveDate = DateTimeOffset.UtcNow.AddDays(-1),
-            DepartDate = DateTimeOffset.UtcNow.AddDays(1),
             LocationType = LocationType.VisitedLocation
         };
 
@@ -66,6 +47,15 @@ public class GetPlannedLocationsTests
             ArriveDate = DateTimeOffset.UtcNow.AddDays(-1),
             DepartDate = DateTimeOffset.UtcNow.AddDays(1),
             LocationType = LocationType.PlannedLocation
+        };
+
+        _visitedLocation = new Location()
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            ArriveDate = DateTimeOffset.UtcNow.AddDays(-1),
+            DepartDate = DateTimeOffset.UtcNow.AddDays(1),
+            LocationType = LocationType.VisitedLocation
         };
 
         _mock.Mock<IUserService>()
@@ -83,8 +73,8 @@ public class GetPlannedLocationsTests
         };
     }
 
-    [TestMethod("[GetPlannedLocations] Unowned Location")]
-    public async Task GetPlannedLocations_UnownedLocation()
+    [TestMethod("[GetVisitedLocations] Unowned Location")]
+    public async Task GetVisitedLocations_UnownedLocation()
     {
         // Arrange
         LocationService locationService = _mock.Create<LocationService>();
@@ -96,66 +86,45 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
+        Result<PagedList<Location>> result = await locationService.GetVisitedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
         CollectionAssert.IsNotSubsetOf(locations, result.Value.ToList());
     }
 
-    [TestMethod("[GetPlannedLocations] Location In Past")]
-    public async Task GetPlannedLocations_LocationInPast()
+    [TestMethod("[GetVisitedLocations] Planned Location")]
+    public async Task GetVisitedLocations_PlannedLocation()
     {
         // Arrange
         LocationService locationService = _mock.Create<LocationService>();
 
-        List<Location> locations = new List<Location> { _pastLocation };
+        List<Location> locations = new List<Location> { _plannedLocation };
 
         _mock.Mock<IBPContext>()
             .Setup(context => context.Locations)
             .ReturnsDbSet(locations);
 
         // Act
-        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
+        Result<PagedList<Location>> result = await locationService.GetVisitedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
         CollectionAssert.IsNotSubsetOf(locations, result.Value.ToList());
     }
 
-    [TestMethod("[GetPlannedLocations] Visited Location")]
-    public async Task GetPlannedLocations_VisitedLocation()
+    [TestMethod("[GetVisitedLocations] Success")]
+    public async Task GetVisitedLocations_Success()
     {
         // Arrange
         LocationService locationService = _mock.Create<LocationService>();
 
-        List<Location> locations = new List<Location> { _visitedLocation };
-
-        _mock.Mock<IBPContext>()
-            .Setup(context => context.Locations)
-            .ReturnsDbSet(locations);
-
-        // Act
-        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
-
-        // Assert
-        Assert.IsTrue(result.Success);
-        CollectionAssert.IsNotSubsetOf(locations, result.Value.ToList());
-    }
-
-    [TestMethod("[GetPlannedLocations] Success")]
-    public async Task GetPlannedLocations_Success()
-    {
-        // Arrange
-        LocationService locationService = _mock.Create<LocationService>();
-
-        List<Location> expectedLocations = new List<Location> { _plannedLocation };
+        List<Location> expectedLocations = new List<Location> { _visitedLocation };
         List<Location> locations = new List<Location>
         {
-            _visitedLocation,
-            _pastLocation,
             _unownedLocation,
-            _plannedLocation
+            _plannedLocation,
+            _visitedLocation
         };
 
         _mock.Mock<IBPContext>()
@@ -163,7 +132,7 @@ public class GetPlannedLocationsTests
             .ReturnsDbSet(locations);
 
         // Act
-        Result<PagedList<Location>> result = await locationService.GetPlannedLocations(_pagingParameters);
+        Result<PagedList<Location>> result = await locationService.GetVisitedLocations(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

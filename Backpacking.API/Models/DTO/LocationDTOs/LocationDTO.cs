@@ -7,9 +7,7 @@ public class LocationDTO
     public float Longitude { get; set; }
     public float Latitude { get; set; }
     public DateTimeOffset ArriveDate { get; set; }
-    public DateTimeOffset DepartDate { get; set; }
-    public DateTimeOffset CreatedDate { get; set; }
-    public DateTimeOffset LastModifiedDate { get; set; }
+    public DateTimeOffset? DepartDate { get; set; }
 
     public LocationDTO(Location location)
     {
@@ -18,8 +16,6 @@ public class LocationDTO
         Longitude = location.Longitude;
         Latitude = location.Latitude;
         ArriveDate = location.ArriveDate;
-        DepartDate = location.DepartDate;
-        CreatedDate = location.CreatedDate;
-        LastModifiedDate = location.LastModifiedDate;
+        DepartDate = location.DepartDate == DateTimeOffset.MaxValue ? null : location.DepartDate;
     }
 }

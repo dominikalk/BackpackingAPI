@@ -33,7 +33,7 @@ public class LogCurrentLocationTests
             .ReturnsDbSet(new List<Location>());
     }
 
-    [TestMethod("[LogCurrentLocation] NoPreviousCurrentSuccess")]
+    [TestMethod("[LogCurrentLocation] No Previous Current Success")]
     public async Task LogCurrentLocation_NoPreviousCurrentSuccess()
     {
         // Arrange
@@ -53,7 +53,7 @@ public class LogCurrentLocationTests
         Assert.IsTrue(result.Success);
     }
 
-    [TestMethod("[LogCurrentLocation] WithPreviousCurrentSuccess")]
+    [TestMethod("[LogCurrentLocation] With Previous Current Success")]
     public async Task LogCurrentLocation_WithPreviousCurrentSuccess()
     {
         // Arrange

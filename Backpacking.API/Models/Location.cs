@@ -27,9 +27,9 @@ public class Location : IBPModel
             Name = currentLocationDto.Name,
             Longitude = currentLocationDto.Longitude,
             Latitude = currentLocationDto.Latitude,
-            UserId = userId,
             ArriveDate = DateTimeOffset.UtcNow,
-            LocationType = LocationType.VisitedLocation
+            LocationType = LocationType.VisitedLocation,
+            UserId = userId,
         };
     }
 
@@ -47,9 +47,26 @@ public class Location : IBPModel
         };
     }
 
-    public void DepartLocation()
+    public Result<Location> DepartLocation()
     {
         DepartDate = DateTimeOffset.UtcNow;
+        return this;
+    }
+
+    public Result<Location> UpdatePlannedLocation(UpdatePlannedLocationDTO dto)
+    {
+        if (LocationType == LocationType.VisitedLocation)
+        {
+            return Errors.LocationPlanned;
+        }
+
+        Name = dto.Name;
+        Longitude = dto.Longitude;
+        Latitude = dto.Latitude;
+        ArriveDate = dto.ArriveDate;
+        DepartDate = dto.DepartDate;
+
+        return this;
     }
 
     public class Errors
@@ -57,6 +74,7 @@ public class Location : IBPModel
         public static BPError InvalidId = new BPError(HttpStatusCode.BadRequest, "Invalid Id");
         public static BPError ArriveDateFuture = new BPError(HttpStatusCode.BadRequest, "Arrive date must be in the future.");
         public static BPError ArriveBeforeDepart = new BPError(HttpStatusCode.BadRequest, "Arrive date must be before depart date.");
+        public static BPError LocationPlanned = new BPError(HttpStatusCode.BadRequest, "Location cannot be visited");
         public static BPError LocationNotFound = new BPError(HttpStatusCode.NotFound, "Location not found.");
     }
 }

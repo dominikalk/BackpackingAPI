@@ -76,6 +76,59 @@ public class LocationV1Controller : ControllerBase
         };
     }
 
+    [HttpPost("planned")]
+    [EndpointName(nameof(LogPlannedLocation))]
+    public async Task<IActionResult> LogPlannedLocation(LogPlannedLocationDTO location)
+    {
+        Result<Location> response = await _locationService.LogPlannedLocation(location);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return CreatedAtAction(nameof(GetLocationById), new { id = location.Id }, apiResult);
+        };
+    }
+
+    [HttpPut("planned/{id:guid}")]
+    [EndpointName(nameof(UpdatePlannedLocation))]
+    public async Task<IActionResult> UpdatePlannedLocation(Guid id, UpdatePlannedLocationDTO location)
+    {
+        Result<Location> response = await _locationService.UpdatePlannedLocation(id, location);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
+        };
+    }
+
+    [HttpGet("visited")]
+    [EndpointName(nameof(GetVisitedLocations))]
+    public async Task<IActionResult> GetVisitedLocations([FromQuery] BPPagingParameters pagingParameters)
+    {
+        Result<PagedList<Location>> response = await _locationService.GetVisitedLocations(pagingParameters);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(PagedList<Location> pagedLocations)
+        {
+            IEnumerable<LocationDTO> locationDtos = pagedLocations.Select(location => new LocationDTO(location));
+
+            BPPagedApiResult<LocationDTO> pagedApiResult =
+                new BPPagedApiResult<LocationDTO>(locationDtos, pagedLocations.ToDetails());
+
+            return Ok(pagedApiResult);
+        }
+    }
+
     [HttpGet("planned")]
     [EndpointName(nameof(GetPlannedLocations))]
     public async Task<IActionResult> GetPlannedLocations([FromQuery] BPPagingParameters pagingParameters)
@@ -95,22 +148,6 @@ public class LocationV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("planned")]
-    [EndpointName(nameof(LogPlannedLocation))]
-    public async Task<IActionResult> LogPlannedLocation(LogPlannedLocationDTO location)
-    {
-        Result<Location> response = await _locationService.LogPlannedLocation(location);
-
-        return response.Finally(HandleSuccess, this.HandleError);
-
-        IActionResult HandleSuccess(Location location)
-        {
-            BPApiResult<LocationDTO> apiResult =
-                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
-
-            return CreatedAtAction(nameof(GetLocationById), new { id = location.Id }, apiResult);
-        };
-    }
 
     [HttpGet("{id:guid}")]
     [EndpointName(nameof(GetLocationById))]

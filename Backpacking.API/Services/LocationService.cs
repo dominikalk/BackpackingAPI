@@ -46,7 +46,7 @@ public class LocationService : ILocationService
     {
         return await (await GetCurrentLocation())
             .Then(GuardLocation)
-            .Then(DepartLocation)
+            .Then(location => location.DepartLocation())
             .Then(SaveChanges);
     }
 
@@ -57,6 +57,24 @@ public class LocationService : ILocationService
             .Then(ValidatePlannedLocation)
             .Then(AddLocation)
             .Then(SaveChanges);
+
+        return result;
+    }
+
+    public async Task<Result<Location>> UpdatePlannedLocation(Guid id, UpdatePlannedLocationDTO locationDTO)
+    {
+        Result<Location> result = await GetLocationById(id)
+            .Then(location => location.UpdatePlannedLocation(locationDTO))
+            .Then(ValidatePlannedLocation)
+            .Then(SaveChanges);
+
+        return result;
+    }
+
+    public async Task<Result<PagedList<Location>>> GetVisitedLocations(BPPagingParameters pagingParameters)
+    {
+        Result<PagedList<Location>> result = await _userService.GetCurrentUserId()
+            .Then(userId => GetVisitedLocations(userId, pagingParameters));
 
         return result;
     }
@@ -74,7 +92,7 @@ public class LocationService : ILocationService
         Result<Location> result = await ValidateId(id)
             .Then(_userService.GetCurrentUserId)
             .Then(userId => GetLocationById(id, userId))
-            .Then(location => GuardLocation(location, id));
+            .Then(GuardLocation);
 
         return result;
     }
@@ -89,7 +107,8 @@ public class LocationService : ILocationService
     private Result<Location> ValidatePlannedLocation(Location location)
     {
         Result guard = Result.Guard(() => Guard.IsBefore(DateTimeOffset.UtcNow, location.ArriveDate), Location.Errors.ArriveDateFuture)
-            .Guard(() => Guard.IsBefore(location.ArriveDate, location.DepartDate), Location.Errors.ArriveBeforeDepart);
+            .Guard(() => Guard.IsBefore(location.ArriveDate, location.DepartDate), Location.Errors.ArriveBeforeDepart)
+            .Guard(() => Guard.IsEqual(location.LocationType, LocationType.PlannedLocation), Location.Errors.LocationPlanned);
 
         if (guard.Success is false)
         {
@@ -108,6 +127,16 @@ public class LocationService : ILocationService
                 && location.LocationType == LocationType.VisitedLocation)
            .OrderByDescending(location => location.ArriveDate)
            .FirstOrDefaultAsync();
+    }
+
+    private async Task<Result<PagedList<Location>>> GetVisitedLocations(Guid userId, BPPagingParameters pagingParameters)
+    {
+        return await _bPContext.Locations
+            .Where(location =>
+                location.UserId == userId
+                && location.LocationType == LocationType.VisitedLocation)
+            .OrderByDescending(location => location.ArriveDate)
+            .ToPagedListAsync(pagingParameters);
     }
 
     private async Task<Result<PagedList<Location>>> GetPlannedLocations(Guid userId, BPPagingParameters pagingParameters)
@@ -145,22 +174,6 @@ public class LocationService : ILocationService
             return Location.Errors.LocationNotFound;
         }
 
-        return location;
-    }
-
-    private Result<Location> GuardLocation(Location? location, Guid locationId)
-    {
-        if (location is null)
-        {
-            return new BPError(HttpStatusCode.NotFound, $"Location with id: '{locationId}' does not exist.");
-        }
-
-        return location;
-    }
-
-    private Result<Location> DepartLocation(Location location)
-    {
-        location.DepartLocation();
         return location;
     }
 
