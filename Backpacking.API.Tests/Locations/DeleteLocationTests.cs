@@ -12,13 +12,13 @@ using System.Net;
 namespace Backpacking.API.Tests.Locations;
 
 [TestClass]
-public class DeleteLocationByIdTests
+public class DeleteLocationTests
 {
     private readonly AutoMock _mock = AutoMock.GetLoose();
 
     private Location _location = new Mock<Location>().Object;
 
-    public DeleteLocationByIdTests()
+    public DeleteLocationTests()
     {
         _mock = AutoMock.GetLoose();
     }
@@ -43,29 +43,29 @@ public class DeleteLocationByIdTests
             .ReturnsDbSet(new List<Location> { _location });
     }
 
-    [TestMethod("[DeleteLocationByIdTests] Location Not Found")]
-    public async Task GetLocationById_LocationNotFound()
+    [TestMethod("[DeleteLocation] Location Not Found")]
+    public async Task DeleteLocation_LocationNotFound()
     {
         // Arrange
         LocationService locationService = _mock.Create<LocationService>();
         Guid id = Guid.NewGuid();
 
         // Act
-        Result result = await locationService.DeleteLocationById(id);
+        Result result = await locationService.DeleteLocation(id);
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(HttpStatusCode.NotFound, result.Error.Code);
     }
 
-    [TestMethod("[DeleteLocationByIdTests] Success")]
-    public async Task GetLocationById_Success()
+    [TestMethod("[DeleteLocation] Success")]
+    public async Task DeleteLocation_Success()
     {
         // Arrange
         LocationService locationService = _mock.Create<LocationService>();
 
         // Act
-        Result<Location> result = await locationService.GetLocationById(_location.Id);
+        Result result = await locationService.DeleteLocation(_location.Id);
 
         // Assert
         Assert.IsTrue(result.Success);

@@ -20,7 +20,7 @@ public class LocationV1Controller : ControllerBase
         _locationService = locationService;
     }
 
-    [HttpGet]
+    [HttpGet("current")]
     [EndpointName(nameof(GetCurrentLocation))]
     public async Task<IActionResult> GetCurrentLocation()
     {
@@ -42,7 +42,7 @@ public class LocationV1Controller : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("current")]
     [EndpointName(nameof(LogCurrentLocation))]
     public async Task<IActionResult> LogCurrentLocation(LogCurrentLocationDTO location)
     {
@@ -59,7 +59,7 @@ public class LocationV1Controller : ControllerBase
         };
     }
 
-    [HttpPatch("depart")]
+    [HttpPatch("current/depart")]
     [EndpointName(nameof(DepartCurrentLocation))]
     public async Task<IActionResult> DepartCurrentLocation()
     {
@@ -74,6 +74,42 @@ public class LocationV1Controller : ControllerBase
 
             return Ok(apiResult);
         };
+    }
+
+    [HttpPut("visited/{id:guid}")]
+    [EndpointName(nameof(UpdateVisitedLocation))]
+    public async Task<IActionResult> UpdateVisitedLocation(Guid id, UpdateVisitedLocationDTO location)
+    {
+        Result<Location> response = await _locationService.UpdateVisitedLocation(id, location);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(Location location)
+        {
+            BPApiResult<LocationDTO> apiResult =
+                new BPApiResult<LocationDTO>(new LocationDTO(location), 1, 1);
+
+            return Ok(apiResult);
+        };
+    }
+
+    [HttpGet("visited")]
+    [EndpointName(nameof(GetVisitedLocations))]
+    public async Task<IActionResult> GetVisitedLocations([FromQuery] BPPagingParameters pagingParameters)
+    {
+        Result<PagedList<Location>> response = await _locationService.GetVisitedLocations(pagingParameters);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(PagedList<Location> pagedLocations)
+        {
+            IEnumerable<LocationDTO> locationDtos = pagedLocations.Select(location => new LocationDTO(location));
+
+            BPPagedApiResult<LocationDTO> pagedApiResult =
+                new BPPagedApiResult<LocationDTO>(locationDtos, pagedLocations.ToDetails());
+
+            return Ok(pagedApiResult);
+        }
     }
 
     [HttpPost("planned")]
@@ -108,25 +144,6 @@ public class LocationV1Controller : ControllerBase
 
             return Ok(apiResult);
         };
-    }
-
-    [HttpGet("visited")]
-    [EndpointName(nameof(GetVisitedLocations))]
-    public async Task<IActionResult> GetVisitedLocations([FromQuery] BPPagingParameters pagingParameters)
-    {
-        Result<PagedList<Location>> response = await _locationService.GetVisitedLocations(pagingParameters);
-
-        return response.Finally(HandleSuccess, this.HandleError);
-
-        IActionResult HandleSuccess(PagedList<Location> pagedLocations)
-        {
-            IEnumerable<LocationDTO> locationDtos = pagedLocations.Select(location => new LocationDTO(location));
-
-            BPPagedApiResult<LocationDTO> pagedApiResult =
-                new BPPagedApiResult<LocationDTO>(locationDtos, pagedLocations.ToDetails());
-
-            return Ok(pagedApiResult);
-        }
     }
 
     [HttpGet("planned")]
@@ -168,10 +185,10 @@ public class LocationV1Controller : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [EndpointName(nameof(DeleteLocationById))]
-    public async Task<IActionResult> DeleteLocationById(Guid id)
+    [EndpointName(nameof(DeleteLocation))]
+    public async Task<IActionResult> DeleteLocation(Guid id)
     {
-        Result response = await _locationService.DeleteLocationById(id);
+        Result response = await _locationService.DeleteLocation(id);
 
         return response.Finally(HandleSuccess, this.HandleError);
 

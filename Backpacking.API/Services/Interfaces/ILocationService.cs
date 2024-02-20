@@ -10,10 +10,11 @@ public interface ILocationService
     Task<Result<Location?>> GetCurrentLocation();
     Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO);
     Task<Result<Location>> DepartCurrentLocation();
+    Task<Result<Location>> UpdateVisitedLocation(Guid id, UpdateVisitedLocationDTO locationDTO);
     Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO);
     Task<Result<Location>> UpdatePlannedLocation(Guid id, UpdatePlannedLocationDTO locationDTO);
     Task<Result<PagedList<Location>>> GetVisitedLocations(BPPagingParameters pagingParameters);
     Task<Result<PagedList<Location>>> GetPlannedLocations(BPPagingParameters pagingParameters);
     Task<Result<Location>> GetLocationById(Guid id);
-    Task<Result> DeleteLocationById(Guid id);
+    Task<Result> DeleteLocation(Guid id);
 }

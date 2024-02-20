@@ -19,12 +19,20 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    /// <summary>
+    /// Gets the current user
+    /// </summary>
+    /// <returns>The current user</returns>
     public async Task<Result<BPUser>> GetCurrentUser()
     {
         return await GetClaimsPrinciple()
             .Then(GetUser);
     }
 
+    /// <summary>
+    /// Gets the Id of the current user
+    /// </summary>
+    /// <returns>The Id of the current user</returns>
     public Result<Guid> GetCurrentUserId()
     {
         return GetClaimsPrinciple()
@@ -32,6 +40,10 @@ public class UserService : IUserService
             .Then(ParseId);
     }
 
+    /// <summary>
+    /// Will get the claims principle of the current user
+    /// </summary>
+    /// <returns>The claims principle of the current user</returns>
     private Result<ClaimsPrincipal> GetClaimsPrinciple()
     {
         ClaimsPrincipal? claimsPrincipal = _httpContextAccessor.HttpContext?.User;
@@ -44,6 +56,11 @@ public class UserService : IUserService
         return claimsPrincipal;
     }
 
+    /// <summary>
+    /// Given a claims principal, will get the user
+    /// </summary>
+    /// <param name="principal">The claims principle</param>
+    /// <returns>The user</returns>
     private async Task<Result<BPUser>> GetUser(ClaimsPrincipal principal)
     {
         BPUser? currentUser = await _userManager.GetUserAsync(principal);
@@ -56,6 +73,11 @@ public class UserService : IUserService
         return currentUser;
     }
 
+    /// <summary>
+    /// Given a claims principal, will get the id of the user
+    /// </summary>
+    /// <param name="principal">The claims principle</param>
+    /// <returns>The user's Id</returns>
     private Result<string> GetUserId(ClaimsPrincipal principal)
     {
         string? userId = _userManager.GetUserId(principal);
@@ -68,6 +90,12 @@ public class UserService : IUserService
         return userId;
     }
 
+    /// <summary>
+    /// Will validate the string id provided and parse into a Guid
+    /// if possible. Otherwise an error is returned
+    /// </summary>
+    /// <param name="id">The id to parse</param>
+    /// <returns>The parsed Guid</returns>
     private Result<Guid> ParseId(string id)
     {
         if (!Guid.TryParse(id, out Guid parsedGuid))

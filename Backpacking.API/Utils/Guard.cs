@@ -38,4 +38,19 @@ public class Guard
     {
         return start < end;
     }
+
+    public static bool IsBeforeOrEqual(DateTimeOffset start, DateTimeOffset end)
+    {
+        return start <= end;
+    }
+
+    public static bool IsBeforeOrEqual(DateTimeOffset? start, DateTimeOffset? end)
+    {
+        if (start is null || end is null)
+        {
+            return true;
+        }
+
+        return start <= end;
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace Backpacking.API.Models.DTO.LocationDTOs;
 
-public class UpdatePlannedLocationDTO
+public class UpdateVisitedLocationDTO
 {
     [Required]
     [MaxLength(100)]
@@ -17,5 +17,6 @@ public class UpdatePlannedLocationDTO
     [Required]
     public required DateTimeOffset ArriveDate { get; set; }
 
-    public DateTimeOffset? DepartDate { get; set; } = DateTimeOffset.MaxValue;
+    [Required]
+    public required DateTimeOffset? DepartDate { get; set; }
 }
