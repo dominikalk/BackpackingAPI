@@ -5,6 +5,11 @@ namespace Backpacking.API.Utils;
 
 public static class QueryableExtensions
 {
+    /// <summary>
+    /// Extends IQueryable and provides a paged list based on paging parameters
+    /// </summary>
+    /// <param name="pagingParameters">The paging parameters</param>
+    /// <returns>A paged list based on the paging parameters</returns>
     public static PagedList<T> ToPagedList<T>(this IQueryable<T> source, BPPagingParameters pagingParameters)
     {
         int count = source.Count();
@@ -16,6 +21,11 @@ public static class QueryableExtensions
         return new PagedList<T>(items, count, pagingParameters.PageNumber, pagingParameters.PageSize);
     }
 
+    /// <summary>
+    /// Extends IQueryable and provides a paged list based on paging parameters
+    /// </summary>
+    /// <param name="pagingParameters">The paging parameters</param>
+    /// <returns>A paged list based on the paging parameters</returns>
     public static async Task<PagedList<T>> ToPagedListAsync<T>(this IQueryable<T> source, BPPagingParameters pagingParameters)
     {
         int count = source.Count();

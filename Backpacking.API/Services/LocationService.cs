@@ -72,7 +72,8 @@ public class LocationService : ILocationService
     /// <returns>The updated visited location</returns>
     public async Task<Result<Location>> UpdateVisitedLocation(Guid id, UpdateVisitedLocationDTO locationDTO)
     {
-        return await _userService.GetCurrentUserId()
+        return await ValidateId(id)
+            .Then(_userService.GetCurrentUserId)
             .Then(userId => GetAdjacentVisitedLocations(id, userId))
             .Then(adjacentLocations => ValidateAdjacentVisitedLocationsForUpdate(adjacentLocations, locationDTO))
             .Then(adjacentLocations => UpdateAdjacentVisitedLocations(adjacentLocations, locationDTO))
@@ -215,7 +216,7 @@ public class LocationService : ILocationService
                 location.UserId == userId
                 && location.LocationType == LocationType.VisitedLocation)
             .OrderByDescending(location => location.ArriveDate)
-            .OrderByDescending(location => location.DepartDate)
+            .ThenByDescending(location => location.DepartDate)
             .ToPagedListAsync(pagingParameters);
     }
 
@@ -244,7 +245,7 @@ public class LocationService : ILocationService
                 && location.LocationType == LocationType.VisitedLocation
                 && location.ArriveDate >= middleLocation.Value.DepartDate)
             .OrderBy(location => location.ArriveDate)
-            .OrderBy(location => location.DepartDate)
+            .ThenBy(location => location.DepartDate)
             .FirstOrDefault();
 
         Location? prevLocation = _bPContext.Locations
@@ -254,7 +255,7 @@ public class LocationService : ILocationService
                 && location.LocationType == LocationType.VisitedLocation
                 && location.DepartDate <= middleLocation.Value.ArriveDate)
             .OrderByDescending(location => location.DepartDate)
-            .OrderByDescending(location => location.ArriveDate)
+            .ThenByDescending(location => location.ArriveDate)
             .FirstOrDefault();
 
         return new AdjacentLocations(prevLocation, middleLocation.Value, nextLocation);
@@ -322,7 +323,7 @@ public class LocationService : ILocationService
                 && location.UserId == userId
                 && location.LocationType == LocationType.PlannedLocation)
             .OrderBy(location => location.ArriveDate)
-            .OrderBy(location => location.DepartDate)
+            .ThenBy(location => location.DepartDate)
             .ToPagedListAsync(pagingParameters);
     }
 

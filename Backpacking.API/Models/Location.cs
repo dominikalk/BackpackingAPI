@@ -6,20 +6,70 @@ namespace Backpacking.API.Models;
 
 public class Location : IBPModel
 {
+    /// <summary>
+    /// The id of the location
+    /// </summary>
     public Guid Id { get; init; } = Guid.NewGuid();
+
+    /// <summary>
+    /// The name of the location
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The longitude of the location
+    /// </summary>
     public float Longitude { get; set; }
+
+    /// <summary>
+    /// The latitude of the location
+    /// </summary>
     public float Latitude { get; set; }
+
+    /// <summary>
+    /// The id of the user the location belongs to
+    /// </summary>
     public Guid UserId { get; init; }
+
+    /// <summary>
+    /// The user the location belongs to
+    /// </summary>
     public BPUser? User { get; init; }
+
+    /// <summary>
+    /// The date the location was / is planned to be arrived at
+    /// </summary>
     public DateTimeOffset ArriveDate { get; set; }
+
+    /// <summary>
+    /// The date the location was / is planned to be departed at
+    /// </summary>
     public DateTimeOffset DepartDate { get; set; } = DateTimeOffset.MaxValue;
+
+    /// <summary>
+    /// The type of location (visited or planned)
+    /// </summary>
     public LocationType LocationType { get; set; }
+
+    /// <summary>
+    /// The date the location was created on
+    /// </summary>
     public DateTimeOffset CreatedDate { get; set; }
+
+    /// <summary>
+    /// The date the location was last modified on
+    /// </summary>
     public DateTimeOffset LastModifiedDate { get; set; }
 
     public Location() { }
 
+    /// <summary>
+    /// Given a current location dto and a user id, will return a new current location
+    /// based on their values
+    /// </summary>
+    /// <param name="currentLocationDto">The values for the current location</param>
+    /// <param name="userId">The user's id</param>
+    /// <returns>The new current location</returns>
     public static Location Create(LogCurrentLocationDTO currentLocationDto, Guid userId)
     {
         return new Location()
@@ -33,6 +83,13 @@ public class Location : IBPModel
         };
     }
 
+    /// <summary>
+    /// Given a planned location dto and a user id, will return a new planned location
+    /// based on their values
+    /// </summary>
+    /// <param name="plannedLocationDto">The values for the planned location</param>
+    /// <param name="userId">The user's id</param>
+    /// <returns>The new planned location</returns>
     public static Location Create(LogPlannedLocationDTO plannedLocationDto, Guid userId)
     {
         return new Location()
@@ -47,12 +104,21 @@ public class Location : IBPModel
         };
     }
 
+    /// <summary>
+    /// Will depart from the location
+    /// </summary>
+    /// <returns>The departed location</returns>
     public Result<Location> DepartLocation()
     {
         DepartDate = DateTimeOffset.UtcNow;
         return this;
     }
 
+    /// <summary>
+    /// Will update the visited location based on the dto properties
+    /// </summary>
+    /// <param name="dto">The properties to update the location with</param>
+    /// <returns>The updated location</returns>
     public Result<Location> UpdateVisitedLocation(UpdateVisitedLocationDTO dto)
     {
         if (LocationType == LocationType.PlannedLocation)
@@ -69,7 +135,11 @@ public class Location : IBPModel
         return this;
     }
 
-
+    /// <summary>
+    /// Will update the planned location based on the dto properties
+    /// </summary>
+    /// <param name="dto">The properties to update the location with</param>
+    /// <returns>The updated location</returns>
     public Result<Location> UpdatePlannedLocation(UpdatePlannedLocationDTO dto)
     {
         if (LocationType == LocationType.VisitedLocation)

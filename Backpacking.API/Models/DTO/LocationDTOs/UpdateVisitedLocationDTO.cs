@@ -17,6 +17,5 @@ public class UpdateVisitedLocationDTO
     [Required]
     public required DateTimeOffset ArriveDate { get; set; }
 
-    [Required]
-    public required DateTimeOffset? DepartDate { get; set; }
+    public DateTimeOffset? DepartDate { get; set; }
 }
