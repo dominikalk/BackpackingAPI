@@ -30,6 +30,7 @@ builder.Services.AddDbContext<IBPContext, BPContext>(options =>
 
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
 
 builder.Services.AddAuthorization();
 
