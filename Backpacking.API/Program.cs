@@ -2,6 +2,7 @@ using Backpacking.API.DbContexts;
 using Backpacking.API.Models;
 using Backpacking.API.Services;
 using Backpacking.API.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -27,6 +28,11 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<IBPContext, BPContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+});
 
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IUserService, UserService>();

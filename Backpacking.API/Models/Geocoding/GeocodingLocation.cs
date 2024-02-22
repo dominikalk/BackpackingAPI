@@ -1,4 +1,7 @@
-﻿namespace Backpacking.API.Models.Geocoding;
+﻿using Backpacking.API.Utils;
+using System.Net;
+
+namespace Backpacking.API.Models.Geocoding;
 
 public class GeocodingLocation
 {
@@ -20,5 +23,10 @@ public class GeocodingLocation
         Label = location.Formatted_Address;
         Longitude = location.Geometry.Location.Lng;
         Latitude = location.Geometry.Location.Lat;
+    }
+
+    public class Errors
+    {
+        public static BPError InternalServerError = new BPError(HttpStatusCode.InternalServerError, "Internal server error");
     }
 }

@@ -6,6 +6,29 @@ namespace Backpacking.API.Models;
 
 public class BPUser : IdentityUser<Guid>
 {
+    /// <summary>
+    /// The first name of the user
+    /// </summary>
+    public string FirstName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The last name of the user
+    /// </summary>
+    public string LastName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The bio of the user: A short description of the user
+    /// </summary>
+    public string? Bio { get; set; }
+
+    /// <summary>
+    /// The date that the user joined the app
+    /// </summary>
+    public DateTimeOffset JoinedDate { get; set; }
+
+    /// <summary>
+    /// The locations belonging to the user
+    /// </summary>
     public IEnumerable<Location> Locations { get; set; } = new List<Location>();
 
     public class Errors

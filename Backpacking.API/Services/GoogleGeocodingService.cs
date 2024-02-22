@@ -2,7 +2,6 @@
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Newtonsoft.Json;
-using System.Net;
 
 namespace Backpacking.API.Services;
 
@@ -27,7 +26,7 @@ public class GoogleGeocodingService : IGeocodingService
 
         if (!response.IsSuccessStatusCode)
         {
-            return new BPError(HttpStatusCode.InternalServerError, "Internal server error");
+            return GeocodingLocation.Errors.InternalServerError;
         }
 
         string apiResponse = await response.Content.ReadAsStringAsync();
@@ -35,7 +34,7 @@ public class GoogleGeocodingService : IGeocodingService
 
         if (googleResponse is null)
         {
-            return new BPError(HttpStatusCode.InternalServerError, "Internal server error");
+            return GeocodingLocation.Errors.InternalServerError;
         }
 
         return Result<IEnumerable<GeocodingLocation>>.Ok(
@@ -52,7 +51,7 @@ public class GoogleGeocodingService : IGeocodingService
 
         if (!response.IsSuccessStatusCode)
         {
-            return new BPError(HttpStatusCode.InternalServerError, "Internal server error");
+            return GeocodingLocation.Errors.InternalServerError;
         }
 
         string apiResponse = await response.Content.ReadAsStringAsync();
@@ -60,7 +59,7 @@ public class GoogleGeocodingService : IGeocodingService
 
         if (googleResponse is null)
         {
-            return new BPError(HttpStatusCode.InternalServerError, "Internal server error");
+            return GeocodingLocation.Errors.InternalServerError;
         }
 
         return Result<IEnumerable<string>>.Ok(
