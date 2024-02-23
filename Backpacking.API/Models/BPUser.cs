@@ -39,19 +39,25 @@ public class BPUser : IdentityUser<Guid>
     /// <summary>
     /// The requests sent from the user to another
     /// </summary>
-    public IEnumerable<Friend> SentFriendRequests { get; set; } = new List<Friend>();
+    public IEnumerable<UserRelation> SentUserRelations { get; set; } = new List<UserRelation>();
 
     /// <summary>
     /// The requests sent from another user to the user
     /// </summary>
-    public IEnumerable<Friend> ReceivedFriendRequests { get; set; } = new List<Friend>();
+    public IEnumerable<UserRelation> ReceivedUserRelations { get; set; } = new List<UserRelation>();
+
+    /// <summary>
+    /// The full name of the user
+    /// </summary>
+    [NotMapped]
+    public string FullName => $"{FirstName} {LastName}";
 
     /// <summary>
     /// The pending friend requests for the user
     /// </summary>
     [NotMapped]
-    public IEnumerable<Friend> PendingFriendRequests =>
-        ReceivedFriendRequests.Where(request => request.RequestStatus == FriendRequestStatus.Pending);
+    public IEnumerable<UserRelation> PendingUserRelations =>
+        ReceivedUserRelations.Where(request => request.RelationType == UserRelationType.Pending);
 
     /// <summary>
     /// The users who are friends with the user
@@ -61,8 +67,8 @@ public class BPUser : IdentityUser<Guid>
     {
         get
         {
-            List<BPUser> friends = SentFriendRequests.Where(friend => friend.Approved).Select(friend => friend.RequestedTo).ToList();
-            friends.AddRange(ReceivedFriendRequests.Where(friend => friend.Approved).Select(friend => friend.RequestedBy));
+            List<BPUser> friends = SentUserRelations.Where(friend => friend.IsFriend).Select(friend => friend.SentTo).ToList();
+            friends.AddRange(ReceivedUserRelations.Where(friend => friend.IsFriend).Select(friend => friend.SentBy));
             return friends;
         }
     }

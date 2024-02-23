@@ -21,20 +21,21 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
     public DbSet<TEntity> GetSet<TEntity>() where TEntity : class, IBPModel => Set<TEntity>();
 
     public DbSet<Location> Locations => Set<Location>();
+    public DbSet<UserRelation> UserRelations => Set<UserRelation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Friend>()
-            .HasOne(a => a.RequestedBy)
-            .WithMany(b => b.SentFriendRequests)
-            .HasForeignKey(c => c.RequestedById);
+        modelBuilder.Entity<UserRelation>()
+            .HasOne(a => a.SentBy)
+            .WithMany(b => b.SentUserRelations)
+            .HasForeignKey(c => c.SentById);
 
-        modelBuilder.Entity<Friend>()
-            .HasOne(a => a.RequestedTo)
-            .WithMany(b => b.ReceivedFriendRequests)
-            .HasForeignKey(c => c.RequestedToId);
+        modelBuilder.Entity<UserRelation>()
+            .HasOne(a => a.SentTo)
+            .WithMany(b => b.ReceivedUserRelations)
+            .HasForeignKey(c => c.SentToId);
     }
 
     public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)

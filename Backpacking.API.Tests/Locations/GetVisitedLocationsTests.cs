@@ -18,7 +18,7 @@ public class GetVisitedLocationsTests
     private Location _unownedLocation = new Mock<Location>().Object;
     private Location _plannedLocation = new Mock<Location>().Object;
     private Location _visitedLocation = new Mock<Location>().Object;
-    BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
+    private BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
 
 
     public GetVisitedLocationsTests()

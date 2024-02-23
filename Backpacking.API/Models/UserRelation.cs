@@ -2,7 +2,7 @@
 
 namespace Backpacking.API.Models;
 
-public class Friend : IBPModel
+public class UserRelation : IBPModel
 {
     /// <summary>
     /// The id of the friend relation
@@ -10,34 +10,34 @@ public class Friend : IBPModel
     public Guid Id { get; init; }
 
     /// <summary>
-    /// The id of the user who requested the friendship
+    /// The id of the user who sent the relationship
     /// </summary>
-    public Guid RequestedById { get; set; }
+    public Guid SentById { get; set; }
 
     /// <summary>
-    /// The id of the user who recieved the friendship request
+    /// The id of the user who recieved the relationship
     /// </summary>
-    public Guid RequestedToId { get; set; }
+    public Guid SentToId { get; set; }
 
     /// <summary>
-    /// The user who requested the friendship
+    /// The user who sent the relationship
     /// </summary>
-    public BPUser RequestedBy { get; set; } = new BPUser();
+    public BPUser SentBy { get; set; } = new BPUser();
 
     /// <summary>
-    /// The user who recieved the friendship request
+    /// The user who recieved the relationship
     /// </summary>
-    public BPUser RequestedTo { get; set; } = new BPUser();
+    public BPUser SentTo { get; set; } = new BPUser();
 
     /// <summary>
-    /// The time that the users became friends
+    /// The date that the users became friends
     /// </summary>
-    public DateTimeOffset? BecameFriendsTime { get; set; }
+    public DateTimeOffset? BecameFriendsDate { get; set; }
 
     /// <summary>
     /// The status of the request
     /// </summary>
-    public FriendRequestStatus RequestStatus { get; set; } = FriendRequestStatus.Pending;
+    public UserRelationType RelationType { get; set; } = UserRelationType.Pending;
 
     /// <summary>
     /// The date the friend relation was created on
@@ -53,12 +53,12 @@ public class Friend : IBPModel
     /// Whether the request has been approved
     /// </summary>
     [NotMapped]
-    public bool Approved => RequestStatus == FriendRequestStatus.Approved;
+    public bool IsFriend => RelationType == UserRelationType.Friend;
 }
 
-public enum FriendRequestStatus
+public enum UserRelationType
 {
     Pending,
-    Approved,
+    Friend,
     Blocked
 };

@@ -37,6 +37,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
+builder.Services.AddScoped<IFriendsService, FriendsService>();
 
 builder.Services.AddAuthorization();
 
