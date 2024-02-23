@@ -3,6 +3,7 @@ using System;
 using Backpacking.API.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backpacking.API.Migrations
 {
     [DbContext(typeof(BPContext))]
-    partial class BPContextModelSnapshot : ModelSnapshot
+    [Migration("20240223180706_AddFriendRelation")]
+    partial class AddFriendRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +33,9 @@ namespace Backpacking.API.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
+
+                    b.Property<Guid?>("BPUserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Bio")
                         .HasColumnType("text");
@@ -91,6 +97,8 @@ namespace Backpacking.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BPUserId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -105,6 +113,9 @@ namespace Backpacking.API.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BPUserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("BecameFriendsTime")
@@ -126,6 +137,8 @@ namespace Backpacking.API.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BPUserId");
 
                     b.HasIndex("RequestedById");
 
@@ -305,8 +318,19 @@ namespace Backpacking.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Backpacking.API.Models.BPUser", b =>
+                {
+                    b.HasOne("Backpacking.API.Models.BPUser", null)
+                        .WithMany("Friends")
+                        .HasForeignKey("BPUserId");
+                });
+
             modelBuilder.Entity("Backpacking.API.Models.Friend", b =>
                 {
+                    b.HasOne("Backpacking.API.Models.BPUser", null)
+                        .WithMany("PendingFriendRequests")
+                        .HasForeignKey("BPUserId");
+
                     b.HasOne("Backpacking.API.Models.BPUser", "RequestedBy")
                         .WithMany("SentFriendRequests")
                         .HasForeignKey("RequestedById")
@@ -388,7 +412,11 @@ namespace Backpacking.API.Migrations
 
             modelBuilder.Entity("Backpacking.API.Models.BPUser", b =>
                 {
+                    b.Navigation("Friends");
+
                     b.Navigation("Locations");
+
+                    b.Navigation("PendingFriendRequests");
 
                     b.Navigation("ReceivedFriendRequests");
 

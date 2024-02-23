@@ -22,6 +22,21 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
 
     public DbSet<Location> Locations => Set<Location>();
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Friend>()
+            .HasOne(a => a.RequestedBy)
+            .WithMany(b => b.SentFriendRequests)
+            .HasForeignKey(c => c.RequestedById);
+
+        modelBuilder.Entity<Friend>()
+            .HasOne(a => a.RequestedTo)
+            .WithMany(b => b.ReceivedFriendRequests)
+            .HasForeignKey(c => c.RequestedToId);
+    }
+
     public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)
     {
         try

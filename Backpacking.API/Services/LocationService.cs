@@ -177,7 +177,7 @@ public class LocationService : ILocationService
     {
         Result guard = Result.Guard(() => Guard.IsBeforeOrEqual(DateTimeOffset.UtcNow, location.ArriveDate), Location.Errors.ArriveDateFuture)
             .Guard(() => Guard.IsBeforeOrEqual(location.ArriveDate, location.DepartDate), Location.Errors.ArriveBeforeDepart)
-            .Guard(() => Guard.IsEqual(location.LocationType, LocationType.PlannedLocation), Location.Errors.LocationPlanned);
+            .Guard(() => location.IsPlannedLocation, Location.Errors.LocationPlanned);
 
         if (guard.Success is false)
         {
@@ -198,7 +198,7 @@ public class LocationService : ILocationService
            .Where(location =>
                 location.DepartDate >= DateTimeOffset.UtcNow
                 && location.UserId == userId
-                && location.LocationType == LocationType.VisitedLocation)
+                && location.IsVisitedLocation)
            .OrderByDescending(location => location.ArriveDate)
            .FirstOrDefaultAsync();
     }
@@ -214,7 +214,7 @@ public class LocationService : ILocationService
         return await _bPContext.Locations
             .Where(location =>
                 location.UserId == userId
-                && location.LocationType == LocationType.VisitedLocation)
+                && location.IsVisitedLocation)
             .OrderByDescending(location => location.ArriveDate)
             .ThenByDescending(location => location.DepartDate)
             .ToPagedListAsync(pagingParameters);
@@ -242,7 +242,7 @@ public class LocationService : ILocationService
             .Where(location =>
                 location.Id != middleLocation.Value.Id
                 && location.UserId == userId
-                && location.LocationType == LocationType.VisitedLocation
+                && location.IsVisitedLocation
                 && location.ArriveDate >= middleLocation.Value.DepartDate)
             .OrderBy(location => location.ArriveDate)
             .ThenBy(location => location.DepartDate)
@@ -252,7 +252,7 @@ public class LocationService : ILocationService
             .Where(location =>
                 location.Id != middleLocation.Value.Id
                 && location.UserId == userId
-                && location.LocationType == LocationType.VisitedLocation
+                && location.IsVisitedLocation
                 && location.DepartDate <= middleLocation.Value.ArriveDate)
             .OrderByDescending(location => location.DepartDate)
             .ThenByDescending(location => location.ArriveDate)
@@ -267,6 +267,7 @@ public class LocationService : ILocationService
     /// -   The depart date of the next location is after or equal to the updated location depart date
     /// -   The arrive date of the updated location is before or equal to the updated location depart date
     /// -   The depart date of the updated location is in the past or null
+    /// -   The arrive date of the updated location is in the past
     /// </summary>
     /// <param name="adjacentLocations">The adjacent locations</param>
     /// <param name="locationDTO">The dto for the values of the updated visited locatio</param>
@@ -276,7 +277,8 @@ public class LocationService : ILocationService
         Result guard = Result.Guard(() => Guard.IsBeforeOrEqual(adjacentLocations.PreviousLocation?.ArriveDate, locationDTO.ArriveDate), Location.Errors.ArriveAfterPreviousArrive)
             .Guard(() => Guard.IsBeforeOrEqual(DateOrMax(locationDTO.DepartDate), adjacentLocations.NextLocation?.DepartDate), Location.Errors.DepartBeforeNextDepart)
             .Guard(() => Guard.IsBeforeOrEqual(locationDTO.ArriveDate, locationDTO.DepartDate), Location.Errors.ArriveBeforeDepart)
-            .Guard(() => Guard.IsBeforeOrEqual(locationDTO.DepartDate, DateTimeOffset.UtcNow), Location.Errors.DepartDatePast);
+            .Guard(() => Guard.IsBeforeOrEqual(locationDTO.DepartDate, DateTimeOffset.UtcNow), Location.Errors.DepartDatePast)
+            .Guard(() => Guard.IsBeforeOrEqual(locationDTO.ArriveDate, DateTimeOffset.UtcNow), Location.Errors.ArriveDatePast);
 
         if (guard.Success is false)
         {
@@ -321,7 +323,7 @@ public class LocationService : ILocationService
             .Where(location =>
                 location.DepartDate >= DateTimeOffset.UtcNow
                 && location.UserId == userId
-                && location.LocationType == LocationType.PlannedLocation)
+                && location.IsPlannedLocation)
             .OrderBy(location => location.ArriveDate)
             .ThenBy(location => location.DepartDate)
             .ToPagedListAsync(pagingParameters);
@@ -378,7 +380,7 @@ public class LocationService : ILocationService
     /// <returns>The visited location</returns>
     private Result<Location> GuardLocationVisited(Location location)
     {
-        if (location.LocationType != LocationType.VisitedLocation)
+        if (!location.IsVisitedLocation)
         {
             return Location.Errors.LocationVisited;
         }
