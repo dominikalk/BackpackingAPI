@@ -27,13 +27,15 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<UserRelation>().HasKey(r => new { r.SentById, r.SentToId });
+
         modelBuilder.Entity<UserRelation>()
-            .HasOne(a => a.SentBy)
+            .HasOne<BPUser>(a => a.SentBy)
             .WithMany(b => b.SentUserRelations)
             .HasForeignKey(c => c.SentById);
 
         modelBuilder.Entity<UserRelation>()
-            .HasOne(a => a.SentTo)
+            .HasOne<BPUser>(a => a.SentTo)
             .WithMany(b => b.ReceivedUserRelations)
             .HasForeignKey(c => c.SentToId);
     }

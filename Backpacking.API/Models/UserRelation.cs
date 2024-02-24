@@ -24,12 +24,12 @@ public class UserRelation : IBPModel
     /// <summary>
     /// The user who sent the relationship
     /// </summary>
-    public BPUser SentBy { get; init; } = new BPUser();
+    public BPUser SentBy { get; init; } = default!;
 
     /// <summary>
     /// The user who recieved the relationship
     /// </summary>
-    public BPUser SentTo { get; init; } = new BPUser();
+    public BPUser SentTo { get; init; } = default!;
 
     /// <summary>
     /// The date that the users became friends
@@ -61,14 +61,14 @@ public class UserRelation : IBPModel
 
     public static UserRelation Create(Guid sentById, Guid sentToId)
     {
-        var test = new UserRelation()
+        UserRelation userRelation = new UserRelation()
         {
             SentById = sentById,
             SentToId = sentToId,
             RelationType = UserRelationType.Pending
         };
 
-        return test;
+        return userRelation;
     }
 
     public class Errors
