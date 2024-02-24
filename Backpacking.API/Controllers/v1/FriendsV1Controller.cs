@@ -39,6 +39,39 @@ public class FriendsV1Controller : ControllerBase
         }
     }
 
+    [HttpPost("unfriend/{userId:guid}")]
+    [EndpointName(nameof(UnfriendUser))]
+    public async Task<IActionResult> UnfriendUser(Guid userId)
+    {
+        Result response = await _friendsService.UnfriendUser(userId);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess()
+        {
+            return Ok();
+        }
+    }
+
+    [HttpGet]
+    [EndpointName(nameof(GetFriends))]
+    public async Task<IActionResult> GetFriends(BPPagingParameters pagingParameters)
+    {
+        Result<PagedList<BPUser>> response = await _friendsService.GetFriends(pagingParameters);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(PagedList<BPUser> pagedFriends)
+        {
+            IEnumerable<FriendDTO> friendsDtos = pagedFriends.Select(friend => new FriendDTO(friend));
+
+            BPPagedApiResult<FriendDTO> pagedApiResult =
+                new BPPagedApiResult<FriendDTO>(friendsDtos, pagedFriends.ToDetails());
+
+            return Ok(pagedApiResult);
+        }
+    }
+
     [HttpPost("request/{userId:guid}")]
     [EndpointName(nameof(SendFriendRequest))]
     public async Task<IActionResult> SendFriendRequest(Guid userId)

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Backpacking.API.Utils;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace Backpacking.API.Models;
 
@@ -7,27 +9,27 @@ public class UserRelation : IBPModel
     /// <summary>
     /// The id of the friend relation
     /// </summary>
-    public Guid Id { get; init; }
+    public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
     /// The id of the user who sent the relationship
     /// </summary>
-    public Guid SentById { get; set; }
+    public Guid SentById { get; init; }
 
     /// <summary>
     /// The id of the user who recieved the relationship
     /// </summary>
-    public Guid SentToId { get; set; }
+    public Guid SentToId { get; init; }
 
     /// <summary>
     /// The user who sent the relationship
     /// </summary>
-    public BPUser SentBy { get; set; } = new BPUser();
+    public BPUser SentBy { get; init; } = new BPUser();
 
     /// <summary>
     /// The user who recieved the relationship
     /// </summary>
-    public BPUser SentTo { get; set; } = new BPUser();
+    public BPUser SentTo { get; init; } = new BPUser();
 
     /// <summary>
     /// The date that the users became friends
@@ -54,6 +56,29 @@ public class UserRelation : IBPModel
     /// </summary>
     [NotMapped]
     public bool IsFriend => RelationType == UserRelationType.Friend;
+
+    public UserRelation() { }
+
+    public static UserRelation Create(Guid sentById, Guid sentToId)
+    {
+        var test = new UserRelation()
+        {
+            SentById = sentById,
+            SentToId = sentToId,
+            RelationType = UserRelationType.Pending
+        };
+
+        return test;
+    }
+
+    public class Errors
+    {
+        public static BPError InvalidId = new BPError(HttpStatusCode.BadRequest, "Invalid Id.");
+        public static BPError UserNotFound = new BPError(HttpStatusCode.NotFound, "User not found.");
+        public static BPError UserBlockedOrBlocking = new BPError(HttpStatusCode.NotFound, "User not found.");
+        public static BPError UserRelationExists = new BPError(HttpStatusCode.BadRequest, "User relation already exists.");
+        public static BPError RelationIdNotUserId = new BPError(HttpStatusCode.BadRequest, "Relation Id cannot be user's Id.");
+    }
 }
 
 public enum UserRelationType
