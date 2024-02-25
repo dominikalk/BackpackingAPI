@@ -16,7 +16,7 @@ public class SearchUsersTests
     private readonly AutoMock _mock = AutoMock.GetLoose();
 
     private Guid _userId;
-    BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
+    private BPPagingParameters _pagingParameters = new Mock<BPPagingParameters>().Object;
 
     public SearchUsersTests()
     {

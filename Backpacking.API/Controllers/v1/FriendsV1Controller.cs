@@ -22,7 +22,7 @@ public class FriendsV1Controller : ControllerBase
 
     [HttpGet("search")]
     [EndpointName(nameof(SearchUsers))]
-    public async Task<IActionResult> SearchUsers([FromQuery] string query, [FromQuery] BPPagingParameters pagingParameters)
+    public async Task<IActionResult> SearchUsers([FromQuery] string? query, [FromQuery] BPPagingParameters pagingParameters)
     {
         Result<PagedList<BPUser>> response = await _friendsService.SearchUsers(query, pagingParameters);
 
@@ -55,7 +55,7 @@ public class FriendsV1Controller : ControllerBase
 
     [HttpGet]
     [EndpointName(nameof(GetFriends))]
-    public async Task<IActionResult> GetFriends(BPPagingParameters pagingParameters)
+    public async Task<IActionResult> GetFriends([FromQuery] BPPagingParameters pagingParameters)
     {
         Result<PagedList<BPUser>> response = await _friendsService.GetFriends(pagingParameters);
 
@@ -116,7 +116,7 @@ public class FriendsV1Controller : ControllerBase
 
     [HttpGet("requests")]
     [EndpointName(nameof(GetFriendRequests))]
-    public async Task<IActionResult> GetFriendRequests(BPPagingParameters pagingParameters)
+    public async Task<IActionResult> GetFriendRequests([FromQuery] BPPagingParameters pagingParameters)
     {
         Result<PagedList<UserRelation>> response = await _friendsService.GetFriendRequests(pagingParameters);
 
@@ -163,7 +163,7 @@ public class FriendsV1Controller : ControllerBase
 
     [HttpGet("blocked")]
     [EndpointName(nameof(GetBlockedUsers))]
-    public async Task<IActionResult> GetBlockedUsers(BPPagingParameters pagingParameters)
+    public async Task<IActionResult> GetBlockedUsers([FromQuery] BPPagingParameters pagingParameters)
     {
         Result<PagedList<BPUser>> response = await _friendsService.GetBlockedUsers(pagingParameters);
 

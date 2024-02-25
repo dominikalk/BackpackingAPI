@@ -59,6 +59,13 @@ public class UserRelation : IBPModel
 
     public UserRelation() { }
 
+    /// <summary>
+    /// Given a sent by and sent to id, will create and return a pending
+    /// user relation
+    /// </summary>
+    /// <param name="sentById">The id of the user the relation is sent by</param>
+    /// <param name="sentToId">The id of the user the relation is sent to</param>
+    /// <returns>The pending user relation</returns>
     public static UserRelation Create(Guid sentById, Guid sentToId)
     {
         UserRelation userRelation = new UserRelation()
@@ -71,6 +78,55 @@ public class UserRelation : IBPModel
         return userRelation;
     }
 
+    /// <summary>
+    /// Guards whether the relation is pending. If the relation is blocked, 
+    /// will return an error stating the relation does not exist.
+    /// </summary>
+    /// <param name="userRelation">The relation</param>
+    /// <returns>The relation</returns>
+    public static Result<UserRelation> GuardPendingRelation(UserRelation userRelation)
+    {
+        if (userRelation.RelationType == UserRelationType.Blocked)
+        {
+            return Errors.RelationNotFound;
+        }
+
+        if (userRelation.RelationType != UserRelationType.Pending)
+        {
+            return Errors.RelationPending;
+        }
+
+        return userRelation;
+    }
+
+    /// <summary>
+    /// Guards whether the relation is a friend. If the relation is blocked, 
+    /// will return an error stating the relation does not exist.
+    /// </summary>
+    /// <param name="userRelation">The relation</param>
+    /// <returns>The relation</returns>
+    public static Result<UserRelation> GuardFriendRelation(UserRelation userRelation)
+    {
+        if (userRelation.RelationType == UserRelationType.Blocked)
+        {
+            return Errors.RelationNotFound;
+        }
+
+        if (userRelation.RelationType != UserRelationType.Friend)
+        {
+            return Errors.RelationFriend;
+        }
+
+        return userRelation;
+    }
+
+    public static Result<UserRelation> AcceptRequest(UserRelation userRelation)
+    {
+        userRelation.RelationType = UserRelationType.Friend;
+        userRelation.BecameFriendsDate = DateTimeOffset.UtcNow;
+        return userRelation;
+    }
+
     public class Errors
     {
         public static BPError InvalidId = new BPError(HttpStatusCode.BadRequest, "Invalid Id.");
@@ -78,6 +134,9 @@ public class UserRelation : IBPModel
         public static BPError UserBlockedOrBlocking = new BPError(HttpStatusCode.NotFound, "User not found.");
         public static BPError UserRelationExists = new BPError(HttpStatusCode.BadRequest, "User relation already exists.");
         public static BPError RelationIdNotUserId = new BPError(HttpStatusCode.BadRequest, "Relation Id cannot be user's Id.");
+        public static BPError RelationNotFound = new BPError(HttpStatusCode.BadRequest, "Relation not found.");
+        public static BPError RelationPending = new BPError(HttpStatusCode.BadRequest, "Relation must be pending.");
+        public static BPError RelationFriend = new BPError(HttpStatusCode.BadRequest, "Relation must be a friend.");
     }
 }
 
