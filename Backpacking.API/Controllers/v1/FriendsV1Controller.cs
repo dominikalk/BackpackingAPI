@@ -53,7 +53,7 @@ public class FriendsV1Controller : ControllerBase
         }
     }
 
-    [HttpGet]
+    [HttpGet("friends")]
     [EndpointName(nameof(GetFriends))]
     public async Task<IActionResult> GetFriends([FromQuery] BPPagingParameters pagingParameters)
     {

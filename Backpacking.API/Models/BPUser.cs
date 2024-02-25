@@ -67,8 +67,15 @@ public class BPUser : IdentityUser<Guid>
     {
         get
         {
-            List<BPUser> friends = SentUserRelations.Where(friend => friend.IsFriend).Select(friend => friend.SentTo).ToList();
-            friends.AddRange(ReceivedUserRelations.Where(friend => friend.IsFriend).Select(friend => friend.SentBy));
+            List<BPUser> friends = SentUserRelations
+                .Where(friend => friend.RelationType == UserRelationType.Friend)
+                .Select(friend => friend.SentTo)
+                .ToList();
+
+            friends.AddRange(ReceivedUserRelations
+                .Where(friend => friend.RelationType == UserRelationType.Friend)
+                .Select(friend => friend.SentBy));
+
             return friends;
         }
     }

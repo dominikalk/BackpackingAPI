@@ -14,6 +14,6 @@ public interface IFriendsService
     Task<Result> RejectFriendRequest(Guid rejectUserId);
     Task<Result<PagedList<UserRelation>>> GetFriendRequests(BPPagingParameters pagingParameters);
     Task<Result<UserRelation>> BlockUser(Guid blockUserId);
-    Task<Result<UserRelation>> UnblockUser(Guid unblockUserId);
+    Task<Result> UnblockUser(Guid unblockUserId);
     Task<Result<PagedList<BPUser>>> GetBlockedUsers(BPPagingParameters pagingParameters);
 }

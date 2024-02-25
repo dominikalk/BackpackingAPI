@@ -252,6 +252,18 @@ public static class ResultExtensions
         return Result<TOut>.Fail(awaited.Error);
     }
 
+    public static async Task<Result<TOut>> Then<TOut>(this Task<Result> result, Func<Task<Result<TOut>>> func)
+    {
+        Result awaited = await result;
+
+        if (awaited.Success)
+        {
+            return await func();
+        }
+
+        return Result<TOut>.Fail(awaited.Error);
+    }
+
     public static Result Guard(this Result result, Func<bool> func, BPError error)
     {
         return (func(), result.Success) switch

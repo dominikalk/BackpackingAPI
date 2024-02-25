@@ -51,12 +51,6 @@ public class UserRelation : IBPModel
     /// </summary>
     public DateTimeOffset LastModifiedDate { get; set; }
 
-    /// <summary>
-    /// Whether the request has been approved
-    /// </summary>
-    [NotMapped]
-    public bool IsFriend => RelationType == UserRelationType.Friend;
-
     public UserRelation() { }
 
     /// <summary>
@@ -73,6 +67,25 @@ public class UserRelation : IBPModel
             SentById = sentById,
             SentToId = sentToId,
             RelationType = UserRelationType.Pending
+        };
+
+        return userRelation;
+    }
+
+    /// <summary>
+    /// Given a sent by and sent to id, will create and return a blocked
+    /// user relation
+    /// </summary>
+    /// <param name="sentById">The id of the user blocking</param>
+    /// <param name="sentToId">The id of the user being blocked</param>
+    /// <returns>The blocked user relation</returns>
+    public static UserRelation CreateBlocked(Guid sentById, Guid sentToId)
+    {
+        UserRelation userRelation = new UserRelation()
+        {
+            SentById = sentById,
+            SentToId = sentToId,
+            RelationType = UserRelationType.Blocked
         };
 
         return userRelation;
@@ -120,6 +133,26 @@ public class UserRelation : IBPModel
         return userRelation;
     }
 
+    /// <summary>
+    /// Guards whether a relation is a blocking relation
+    /// </summary>
+    /// <param name="userRelation">The relation</param>
+    /// <returns>The relation</returns>
+    public static Result<UserRelation> GuardBlockingRelation(UserRelation userRelation)
+    {
+        if (userRelation.RelationType != UserRelationType.Blocked)
+        {
+            return Errors.RelationBlocked;
+        }
+
+        return userRelation;
+    }
+
+    /// <summary>
+    /// Given a pending user relation, will accept the friend request
+    /// </summary>
+    /// <param name="userRelation">The user relation</param>
+    /// <returns>The accepted user relation</returns>
     public static Result<UserRelation> AcceptRequest(UserRelation userRelation)
     {
         userRelation.RelationType = UserRelationType.Friend;
@@ -134,9 +167,10 @@ public class UserRelation : IBPModel
         public static BPError UserBlockedOrBlocking = new BPError(HttpStatusCode.NotFound, "User not found.");
         public static BPError UserRelationExists = new BPError(HttpStatusCode.BadRequest, "User relation already exists.");
         public static BPError RelationIdNotUserId = new BPError(HttpStatusCode.BadRequest, "Relation Id cannot be user's Id.");
-        public static BPError RelationNotFound = new BPError(HttpStatusCode.BadRequest, "Relation not found.");
+        public static BPError RelationNotFound = new BPError(HttpStatusCode.NotFound, "Relation not found.");
         public static BPError RelationPending = new BPError(HttpStatusCode.BadRequest, "Relation must be pending.");
         public static BPError RelationFriend = new BPError(HttpStatusCode.BadRequest, "Relation must be a friend.");
+        public static BPError RelationBlocked = new BPError(HttpStatusCode.BadRequest, "Relation must be blocking.");
     }
 }
 

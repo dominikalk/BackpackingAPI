@@ -43,7 +43,7 @@ public class FriendsService : IFriendsService
         return await ValidateId(unfriendUserId)
             .Then(_userService.GetCurrentUserId)
             .Then(userId => GuardUserIdsNotEqual(userId, unfriendUserId))
-            .Then(userId => GetUserRelation(unfriendUserId, userId))
+            .Then(userId => GetBiDirectionalUserRelation(unfriendUserId, userId))
             .Then(GuardRelationExists)
             .Then(UserRelation.GuardFriendRelation)
             .Then(RemoveUserRelation)
@@ -125,14 +125,46 @@ public class FriendsService : IFriendsService
             .Then(userId => GetFriendRequests(userId, pagingParameters));
     }
 
+    /// <summary>
+    /// Given the id of a user to block, will block the user for the
+    /// current user
+    /// </summary>
+    /// <param name="blockUserId">The user id to block</param>
+    /// <returns>The new blocking relation</returns>
     public async Task<Result<UserRelation>> BlockUser(Guid blockUserId)
     {
-        return Result<UserRelation>.Ok(new UserRelation());
+        Result<Guid> userId = _userService.GetCurrentUserId();
+
+        if (!userId.Success)
+        {
+            return userId.Error;
+        }
+
+        return await ValidateId(blockUserId)
+            .Then(() => GuardUserIdsNotEqual(userId.Value, blockUserId))
+            .Then(() => GuardUserExists(blockUserId))
+            .Then(() => GetBiDirectionalUserRelation(userId.Value, blockUserId))
+            .Then(GuardBlockRelationValid)
+            .Then(currentRelation => AddBlockedRelation(currentRelation, userId.Value, blockUserId))
+            .Then(SaveChanges);
     }
 
-    public async Task<Result<UserRelation>> UnblockUser(Guid unblockUserId)
+    /// <summary>
+    /// Given the id of a user to unblock, if they are blocked will remove
+    /// the user relation.
+    /// </summary>
+    /// <param name="unblockUserId">The id of the user to unblock</param>
+    /// <returns>Ok Result</returns>
+    public async Task<Result> UnblockUser(Guid unblockUserId)
     {
-        return Result<UserRelation>.Ok(new UserRelation());
+        return await ValidateId(unblockUserId)
+            .Then(_userService.GetCurrentUserId)
+            .Then(userId => GuardUserIdsNotEqual(userId, unblockUserId))
+            .Then(userId => GetUserRelation(userId, unblockUserId))
+            .Then(GuardRelationExists)
+            .Then(UserRelation.GuardBlockingRelation)
+            .Then(RemoveUserRelation)
+            .Then(SaveChanges);
     }
 
     /// <summary>
@@ -260,6 +292,24 @@ public class FriendsService : IFriendsService
     }
 
     /// <summary>
+    /// Gets the user relation with the provided parameters regardless
+    /// of the way around.
+    /// </summary>
+    /// <param name="sentById">The first id</param>
+    /// <param name="sentToId">The second id</param>
+    /// <returns>The relation</returns>
+    private async Task<Result<UserRelation?>> GetBiDirectionalUserRelation(Guid sentById, Guid sentToId)
+    {
+        return await _bPContext.UserRelations
+            .Where(relationship =>
+                (relationship.SentById == sentById
+                && relationship.SentToId == sentToId)
+                || (relationship.SentById == sentToId
+                && relationship.SentToId == sentById))
+            .FirstOrDefaultAsync();
+    }
+
+    /// <summary>
     /// Guards that the relationship exists
     /// </summary>
     /// <param name="relation">The relationship</param>
@@ -316,6 +366,42 @@ public class FriendsService : IFriendsService
         }
 
         return UserRelation.Errors.UserRelationExists;
+    }
+
+    /// <summary>
+    /// Guards whether a new blocking relation is possible based on the current
+    /// </summary>
+    /// <param name="relation">The optional current relation</param>
+    /// <returns>The relation</returns>
+    private Result<UserRelation?> GuardBlockRelationValid(UserRelation? relation)
+    {
+        if (relation?.RelationType == UserRelationType.Blocked)
+        {
+            return UserRelation.Errors.UserBlockedOrBlocking;
+        }
+
+        return relation;
+    }
+
+    /// <summary>
+    /// Given an optional current user relation, and the user ids, will remove the current relation
+    /// if it exists, and creating a blocking relation
+    /// </summary>
+    /// <param name="currentRelation">The optional current relation to remove</param>
+    /// <param name="userId">The user blocking</param>
+    /// <param name="blockUserId">The user being blocked</param>
+    /// <returns></returns>
+    private Result<UserRelation> AddBlockedRelation(UserRelation? currentRelation, Guid userId, Guid blockUserId)
+    {
+        if (currentRelation != null)
+        {
+            RemoveUserRelation(currentRelation);
+        }
+
+        UserRelation relation = UserRelation.CreateBlocked(userId, blockUserId);
+        _bPContext.UserRelations.Add(relation);
+
+        return relation;
     }
 
     /// <summary>

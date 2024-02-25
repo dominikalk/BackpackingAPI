@@ -135,8 +135,8 @@ public class UnfriendUserTests
         Assert.AreEqual(result.Error, UserRelation.Errors.RelationNotFound);
     }
 
-    [TestMethod("[UnfriendUser] Success")]
-    public async Task UnfriendUser_Success()
+    [TestMethod("[UnfriendUser] Success Sent To Relation")]
+    public async Task UnfriendUser_SuccessSentToRelation()
     {
         // Arrange
         FriendsService friendsService = _mock.Create<FriendsService>();
@@ -147,6 +147,32 @@ public class UnfriendUserTests
         {
             SentById = unfriendUserId,
             SentToId = _userId,
+            RelationType = UserRelationType.Friend,
+        };
+
+        _mock.Mock<IBPContext>()
+            .Setup(context => context.UserRelations)
+            .ReturnsDbSet(new List<UserRelation> { userRelation });
+
+        // Act
+        Result result = await friendsService.UnfriendUser(unfriendUserId);
+
+        // Assert
+        Assert.IsTrue(result.Success);
+    }
+
+    [TestMethod("[UnfriendUser] Success Sent By Relation")]
+    public async Task UnfriendUser_SuccessSentByRelation()
+    {
+        // Arrange
+        FriendsService friendsService = _mock.Create<FriendsService>();
+
+        Guid unfriendUserId = Guid.NewGuid();
+
+        UserRelation userRelation = new UserRelation()
+        {
+            SentById = _userId,
+            SentToId = unfriendUserId,
             RelationType = UserRelationType.Friend,
         };
 
