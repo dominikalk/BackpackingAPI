@@ -1,13 +1,12 @@
 ﻿using Autofac.Extras.Moq;
 using Backpacking.API.DbContexts;
-using Backpacking.API.Models.API;
 using Backpacking.API.Models;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class UnfriendUserTests
@@ -43,10 +42,10 @@ public class UnfriendUserTests
     public async Task UnfriendUser_InvalidId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnfriendUser(Guid.Empty);
+        Result result = await networkService.UnfriendUser(Guid.Empty);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -57,10 +56,10 @@ public class UnfriendUserTests
     public async Task UnfriendUser_OwnId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnfriendUser(_userId);
+        Result result = await networkService.UnfriendUser(_userId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -71,10 +70,10 @@ public class UnfriendUserTests
     public async Task UnfriendUser_RelationDoesntExist()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnfriendUser(Guid.NewGuid());
+        Result result = await networkService.UnfriendUser(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -85,7 +84,7 @@ public class UnfriendUserTests
     public async Task UnfriendUser_RelationNotFriend()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unfriendUserId = Guid.NewGuid();
 
@@ -101,7 +100,7 @@ public class UnfriendUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnfriendUser(unfriendUserId);
+        Result result = await networkService.UnfriendUser(unfriendUserId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -112,7 +111,7 @@ public class UnfriendUserTests
     public async Task UnfriendUser_RelationBlocked()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unfriendUserId = Guid.NewGuid();
 
@@ -128,7 +127,7 @@ public class UnfriendUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnfriendUser(unfriendUserId);
+        Result result = await networkService.UnfriendUser(unfriendUserId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -139,7 +138,7 @@ public class UnfriendUserTests
     public async Task UnfriendUser_SuccessSentToRelation()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unfriendUserId = Guid.NewGuid();
 
@@ -155,7 +154,7 @@ public class UnfriendUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnfriendUser(unfriendUserId);
+        Result result = await networkService.UnfriendUser(unfriendUserId);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -165,7 +164,7 @@ public class UnfriendUserTests
     public async Task UnfriendUser_SuccessSentByRelation()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unfriendUserId = Guid.NewGuid();
 
@@ -181,7 +180,7 @@ public class UnfriendUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnfriendUser(unfriendUserId);
+        Result result = await networkService.UnfriendUser(unfriendUserId);
 
         // Assert
         Assert.IsTrue(result.Success);

@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backpacking.API.Services;
 
-public class FriendsService : IFriendsService
+public class NetworkService : INetworkService
 {
     private readonly IBPContext _bPContext;
     private readonly IUserService _userService;
 
-    public FriendsService(
+    public NetworkService(
         IBPContext bPContext,
         IUserService userService)
     {

@@ -8,7 +8,7 @@ using Moq.EntityFrameworkCore;
 using Backpacking.API.Models.API;
 using Moq;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class GetFriendsTests
@@ -51,7 +51,7 @@ public class GetFriendsTests
     public async Task GetFriends_OmitUnrelatedRelation()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -65,7 +65,7 @@ public class GetFriendsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetFriends(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetFriends(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -76,7 +76,7 @@ public class GetFriendsTests
     public async Task GetFriends_OmitNotFriendRelation()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -90,7 +90,7 @@ public class GetFriendsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetFriends(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetFriends(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -101,7 +101,7 @@ public class GetFriendsTests
     public async Task GetFriends_SuccessSentToFriend()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -115,7 +115,7 @@ public class GetFriendsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetFriends(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetFriends(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -126,7 +126,7 @@ public class GetFriendsTests
     public async Task GetFriends_SuccessSentByFriend()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -140,7 +140,7 @@ public class GetFriendsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetFriends(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetFriends(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

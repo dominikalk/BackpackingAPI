@@ -8,7 +8,7 @@ using Backpacking.API.Utils;
 using Moq;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class GetFriendRequestsTests
@@ -47,7 +47,7 @@ public class GetFriendRequestsTests
     public async Task GetFriendRequests_OmitNotUsersRequest()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -60,7 +60,7 @@ public class GetFriendRequestsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<UserRelation>> result = await friendsService.GetFriendRequests(_pagingParameters);
+        Result<PagedList<UserRelation>> result = await networkService.GetFriendRequests(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -71,7 +71,7 @@ public class GetFriendRequestsTests
     public async Task GetFriendRequests_OmitNotPending()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -84,7 +84,7 @@ public class GetFriendRequestsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<UserRelation>> result = await friendsService.GetFriendRequests(_pagingParameters);
+        Result<PagedList<UserRelation>> result = await networkService.GetFriendRequests(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -95,7 +95,7 @@ public class GetFriendRequestsTests
     public async Task GetFriendRequests_ReturnFriendRequest()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -108,7 +108,7 @@ public class GetFriendRequestsTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<UserRelation>> result = await friendsService.GetFriendRequests(_pagingParameters);
+        Result<PagedList<UserRelation>> result = await networkService.GetFriendRequests(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

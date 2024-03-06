@@ -1,4 +1,4 @@
-﻿namespace Backpacking.API.Models.DTO.FriendDTOs;
+﻿namespace Backpacking.API.Models.DTO.NetworkDTOs;
 
 public class FriendRequestDTO
 {

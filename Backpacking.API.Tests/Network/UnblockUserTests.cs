@@ -6,7 +6,7 @@ using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class UnblockUserTests
@@ -42,10 +42,10 @@ public class UnblockUserTests
     public async Task UnblockUser_InvalidId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnblockUser(Guid.Empty);
+        Result result = await networkService.UnblockUser(Guid.Empty);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -56,10 +56,10 @@ public class UnblockUserTests
     public async Task UnblockUser_OwnId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnblockUser(_userId);
+        Result result = await networkService.UnblockUser(_userId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -70,10 +70,10 @@ public class UnblockUserTests
     public async Task UnblockUser_RelationDoesntExist()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.UnblockUser(Guid.NewGuid());
+        Result result = await networkService.UnblockUser(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -84,7 +84,7 @@ public class UnblockUserTests
     public async Task UnblockUser_RelationNotFriend()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unblockUserId = Guid.NewGuid();
 
@@ -100,7 +100,7 @@ public class UnblockUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnblockUser(unblockUserId);
+        Result result = await networkService.UnblockUser(unblockUserId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -111,7 +111,7 @@ public class UnblockUserTests
     public async Task UnblockUser_Success()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         Guid unblockUserId = Guid.NewGuid();
 
@@ -127,7 +127,7 @@ public class UnblockUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.UnblockUser(unblockUserId);
+        Result result = await networkService.UnblockUser(unblockUserId);
 
         // Assert
         Assert.IsTrue(result.Success);

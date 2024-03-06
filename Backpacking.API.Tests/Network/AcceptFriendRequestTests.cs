@@ -6,16 +6,16 @@ using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
-public class RejectFriendRequestTests
+public class AcceptFriendRequestTests
 {
     private readonly AutoMock _mock = AutoMock.GetLoose();
 
     private Guid _userId;
 
-    public RejectFriendRequestTests()
+    public AcceptFriendRequestTests()
     {
         _mock = AutoMock.GetLoose();
     }
@@ -38,59 +38,59 @@ public class RejectFriendRequestTests
             .ReturnsDbSet(new List<UserRelation>());
     }
 
-    [TestMethod("[RejectFriendRequest] Invalid Id")]
-    public async Task RejectFriendRequest_InvalidId()
+    [TestMethod("[AcceptFriendRequest] Invalid Id")]
+    public async Task AcceptFriendRequest_InvalidId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(Guid.Empty);
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(Guid.Empty);
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(result.Error, UserRelation.Errors.InvalidId);
     }
 
-    [TestMethod("[RejectFriendRequest] Own Id")]
-    public async Task RejectFriendRequest_OwnId()
+    [TestMethod("[AcceptFriendRequest] Own Id")]
+    public async Task AcceptFriendRequest_OwnId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(_userId);
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(_userId);
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(result.Error, UserRelation.Errors.RelationIdNotUserId);
     }
 
-    [TestMethod("[RejectFriendRequest] Relation Doesn't Exist")]
-    public async Task RejectFriendRequest_RelationDoesntExist()
+    [TestMethod("[AcceptFriendRequest] Relation Doesn't Exist")]
+    public async Task AcceptFriendRequest_RelationDoesntExist()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(Guid.NewGuid());
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(result.Error, UserRelation.Errors.RelationNotFound);
     }
 
-    [TestMethod("[RejectFriendRequest] Relation Not Pending")]
-    public async Task RejectFriendRequest_RelationNotPending()
+    [TestMethod("[AcceptFriendRequest] Relation Not Pending")]
+    public async Task AcceptFriendRequest_RelationNotPending()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
-        Guid rejectUserId = Guid.NewGuid();
+        Guid acceptUserId = Guid.NewGuid();
 
         UserRelation userRelation = new UserRelation()
         {
-            SentById = rejectUserId,
+            SentById = acceptUserId,
             SentToId = _userId,
             RelationType = UserRelationType.Friend,
         };
@@ -100,24 +100,24 @@ public class RejectFriendRequestTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(rejectUserId);
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(acceptUserId);
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(result.Error, UserRelation.Errors.RelationPending);
     }
 
-    [TestMethod("[RejectFriendRequest] Relation Blocked")]
-    public async Task RejectFriendRequest_RelationBlocked()
+    [TestMethod("[AcceptFriendRequest] Relation Blocked")]
+    public async Task AcceptFriendRequest_RelationBlocked()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
-        Guid rejectUserId = Guid.NewGuid();
+        Guid acceptUserId = Guid.NewGuid();
 
         UserRelation userRelation = new UserRelation()
         {
-            SentById = rejectUserId,
+            SentById = acceptUserId,
             SentToId = _userId,
             RelationType = UserRelationType.Blocked,
         };
@@ -127,24 +127,24 @@ public class RejectFriendRequestTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(rejectUserId);
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(acceptUserId);
 
         // Assert
         Assert.IsFalse(result.Success);
         Assert.AreEqual(result.Error, UserRelation.Errors.RelationNotFound);
     }
 
-    [TestMethod("[RejectFriendRequest] Success")]
-    public async Task RejectFriendRequest_Success()
+    [TestMethod("[AcceptFriendRequest] Success")]
+    public async Task AcceptFriendRequest_Success()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
-        Guid rejectUserId = Guid.NewGuid();
+        Guid acceptUserId = Guid.NewGuid();
 
         UserRelation userRelation = new UserRelation()
         {
-            SentById = rejectUserId,
+            SentById = acceptUserId,
             SentToId = _userId,
             RelationType = UserRelationType.Pending,
         };
@@ -154,9 +154,12 @@ public class RejectFriendRequestTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result result = await friendsService.RejectFriendRequest(rejectUserId);
+        Result<UserRelation> result = await networkService.AcceptFriendRequest(acceptUserId);
 
         // Assert
         Assert.IsTrue(result.Success);
+        Assert.AreEqual(result.Value.SentById, acceptUserId);
+        Assert.AreEqual(result.Value.SentToId, _userId);
+        Assert.AreEqual(result.Value.RelationType, UserRelationType.Friend);
     }
 }

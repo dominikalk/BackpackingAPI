@@ -8,7 +8,7 @@ using Moq.EntityFrameworkCore;
 using Backpacking.API.Models;
 using Backpacking.API.Models.API;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class SearchUsersTests
@@ -47,7 +47,7 @@ public class SearchUsersTests
     public async Task SearchUsers_OmitCurrentUser()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser currentUser = new BPUser()
         {
@@ -60,7 +60,7 @@ public class SearchUsersTests
            .ReturnsDbSet(new List<BPUser> { currentUser });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.SearchUsers(currentUser.UserName!, _pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.SearchUsers(currentUser.UserName!, _pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -71,7 +71,7 @@ public class SearchUsersTests
     public async Task SearchUsers_OmitBlockedUser()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -95,7 +95,7 @@ public class SearchUsersTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.SearchUsers(user.UserName!, _pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.SearchUsers(user.UserName!, _pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -106,7 +106,7 @@ public class SearchUsersTests
     public async Task SearchUsers_OmitIfBlockedByUser()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -130,7 +130,7 @@ public class SearchUsersTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.SearchUsers(user.UserName!, _pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.SearchUsers(user.UserName!, _pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -141,7 +141,7 @@ public class SearchUsersTests
     public async Task SearchUsers_NoneFound()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -154,7 +154,7 @@ public class SearchUsersTests
            .ReturnsDbSet(new List<BPUser> { user });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.SearchUsers("Test", _pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.SearchUsers("Test", _pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -165,7 +165,7 @@ public class SearchUsersTests
     public async Task SearchUsers_Success()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -178,7 +178,7 @@ public class SearchUsersTests
            .ReturnsDbSet(new List<BPUser> { user });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.SearchUsers(user.UserName!, _pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.SearchUsers(user.UserName!, _pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

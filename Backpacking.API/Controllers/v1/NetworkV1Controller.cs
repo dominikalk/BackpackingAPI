@@ -1,6 +1,6 @@
 ﻿using Backpacking.API.Models;
 using Backpacking.API.Models.API;
-using Backpacking.API.Models.DTO.FriendDTOs;
+using Backpacking.API.Models.DTO.NetworkDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -8,23 +8,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backpacking.API.Controllers.v1;
 
-[Route("v1/friend")]
+[Route("v1/network")]
 [Authorize]
 [ApiController]
-public class FriendsV1Controller : ControllerBase
+public class NetworkV1Controller : ControllerBase
 {
-    private readonly IFriendsService _friendsService;
+    private readonly INetworkService _networkService;
 
-    public FriendsV1Controller(IFriendsService friendsService)
+    public NetworkV1Controller(INetworkService networkService)
     {
-        _friendsService = friendsService;
+        _networkService = networkService;
     }
 
     [HttpGet("search")]
     [EndpointName(nameof(SearchUsers))]
     public async Task<IActionResult> SearchUsers([FromQuery] string? query, [FromQuery] BPPagingParameters pagingParameters)
     {
-        Result<PagedList<BPUser>> response = await _friendsService.SearchUsers(query, pagingParameters);
+        Result<PagedList<BPUser>> response = await _networkService.SearchUsers(query, pagingParameters);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -43,7 +43,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(UnfriendUser))]
     public async Task<IActionResult> UnfriendUser(Guid userId)
     {
-        Result response = await _friendsService.UnfriendUser(userId);
+        Result response = await _networkService.UnfriendUser(userId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -57,7 +57,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(GetFriends))]
     public async Task<IActionResult> GetFriends([FromQuery] BPPagingParameters pagingParameters)
     {
-        Result<PagedList<BPUser>> response = await _friendsService.GetFriends(pagingParameters);
+        Result<PagedList<BPUser>> response = await _networkService.GetFriends(pagingParameters);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -76,7 +76,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(SendFriendRequest))]
     public async Task<IActionResult> SendFriendRequest(Guid userId)
     {
-        Result response = await _friendsService.SendFriendRequest(userId);
+        Result response = await _networkService.SendFriendRequest(userId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -90,7 +90,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(AcceptFriendRequest))]
     public async Task<IActionResult> AcceptFriendRequest(Guid requestId)
     {
-        Result response = await _friendsService.AcceptFriendRequest(requestId);
+        Result response = await _networkService.AcceptFriendRequest(requestId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -104,7 +104,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(RejectFriendRequest))]
     public async Task<IActionResult> RejectFriendRequest(Guid requestId)
     {
-        Result response = await _friendsService.RejectFriendRequest(requestId);
+        Result response = await _networkService.RejectFriendRequest(requestId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -118,7 +118,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(GetFriendRequests))]
     public async Task<IActionResult> GetFriendRequests([FromQuery] BPPagingParameters pagingParameters)
     {
-        Result<PagedList<UserRelation>> response = await _friendsService.GetFriendRequests(pagingParameters);
+        Result<PagedList<UserRelation>> response = await _networkService.GetFriendRequests(pagingParameters);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -137,7 +137,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(BlockUser))]
     public async Task<IActionResult> BlockUser(Guid userId)
     {
-        Result response = await _friendsService.BlockUser(userId);
+        Result response = await _networkService.BlockUser(userId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -151,7 +151,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(UnblockUser))]
     public async Task<IActionResult> UnblockUser(Guid userId)
     {
-        Result response = await _friendsService.UnblockUser(userId);
+        Result response = await _networkService.UnblockUser(userId);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
@@ -165,7 +165,7 @@ public class FriendsV1Controller : ControllerBase
     [EndpointName(nameof(GetBlockedUsers))]
     public async Task<IActionResult> GetBlockedUsers([FromQuery] BPPagingParameters pagingParameters)
     {
-        Result<PagedList<BPUser>> response = await _friendsService.GetBlockedUsers(pagingParameters);
+        Result<PagedList<BPUser>> response = await _networkService.GetBlockedUsers(pagingParameters);
 
         return response.Finally(HandleSuccess, this.HandleError);
 

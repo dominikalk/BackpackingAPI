@@ -7,7 +7,7 @@ using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 using Moq;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class BlockUserTests
@@ -49,10 +49,10 @@ public class BlockUserTests
     public async Task BlockUser_InvalidId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(Guid.Empty);
+        Result<UserRelation> result = await networkService.BlockUser(Guid.Empty);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -63,10 +63,10 @@ public class BlockUserTests
     public async Task BlockUser_OwnId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(_userId);
+        Result<UserRelation> result = await networkService.BlockUser(_userId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -77,10 +77,10 @@ public class BlockUserTests
     public async Task BlockUser_UserDoesntExist()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(Guid.NewGuid());
+        Result<UserRelation> result = await networkService.BlockUser(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -91,7 +91,7 @@ public class BlockUserTests
     public async Task BlockUser_CurrentRelationBlocking()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -105,7 +105,7 @@ public class BlockUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(_blockUser.Id);
+        Result<UserRelation> result = await networkService.BlockUser(_blockUser.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -116,7 +116,7 @@ public class BlockUserTests
     public async Task BlockUser_SuccessCurrentRelationExists()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -130,7 +130,7 @@ public class BlockUserTests
             .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(_blockUser.Id);
+        Result<UserRelation> result = await networkService.BlockUser(_blockUser.Id);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -143,10 +143,10 @@ public class BlockUserTests
     public async Task BlockUser_SuccessNoCurrentRelation()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.BlockUser(_blockUser.Id);
+        Result<UserRelation> result = await networkService.BlockUser(_blockUser.Id);
 
         // Assert
         Assert.IsTrue(result.Success);

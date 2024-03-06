@@ -6,7 +6,7 @@ using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class SendFriendRequestTests
@@ -42,10 +42,10 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_InvalidId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(Guid.Empty);
+        Result<UserRelation> result = await networkService.SendFriendRequest(Guid.Empty);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -56,7 +56,7 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_OwnId()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -68,7 +68,7 @@ public class SendFriendRequestTests
             .ReturnsDbSet(new List<BPUser> { user });
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(_userId);
+        Result<UserRelation> result = await networkService.SendFriendRequest(_userId);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -79,10 +79,10 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_UserDoesntExist()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(Guid.NewGuid());
+        Result<UserRelation> result = await networkService.SendFriendRequest(Guid.NewGuid());
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -93,7 +93,7 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_RelationAlreadyExists()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -121,7 +121,7 @@ public class SendFriendRequestTests
            .ReturnsDbSet(new List<UserRelation> { relation });
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(user.Id);
+        Result<UserRelation> result = await networkService.SendFriendRequest(user.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -132,7 +132,7 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_RelationBlockedBy()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -160,7 +160,7 @@ public class SendFriendRequestTests
            .ReturnsDbSet(new List<UserRelation> { relation });
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(user.Id);
+        Result<UserRelation> result = await networkService.SendFriendRequest(user.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -171,7 +171,7 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_RelationBlocking()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -199,7 +199,7 @@ public class SendFriendRequestTests
            .ReturnsDbSet(new List<UserRelation> { relation });
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(user.Id);
+        Result<UserRelation> result = await networkService.SendFriendRequest(user.Id);
 
         // Assert
         Assert.IsFalse(result.Success);
@@ -210,7 +210,7 @@ public class SendFriendRequestTests
     public async Task SendFriendRequest_Success()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         BPUser user = new BPUser()
         {
@@ -227,7 +227,7 @@ public class SendFriendRequestTests
             .ReturnsDbSet(new List<BPUser> { user, currentUser });
 
         // Act
-        Result<UserRelation> result = await friendsService.SendFriendRequest(user.Id);
+        Result<UserRelation> result = await networkService.SendFriendRequest(user.Id);
 
         // Assert
         Assert.IsTrue(result.Success);

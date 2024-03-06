@@ -8,7 +8,7 @@ using Backpacking.API.Utils;
 using Moq;
 using Moq.EntityFrameworkCore;
 
-namespace Backpacking.API.Tests.Friends;
+namespace Backpacking.API.Tests.Network;
 
 [TestClass]
 public class GetBlockedUsersTests
@@ -47,7 +47,7 @@ public class GetBlockedUsersTests
     public async Task GetBlockedUsers_OmitNotUsersBlocked()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -60,7 +60,7 @@ public class GetBlockedUsersTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetBlockedUsers(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetBlockedUsers(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -71,7 +71,7 @@ public class GetBlockedUsersTests
     public async Task GetBlockedUsers_OmitNotBlocked()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -84,7 +84,7 @@ public class GetBlockedUsersTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetBlockedUsers(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetBlockedUsers(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);
@@ -95,7 +95,7 @@ public class GetBlockedUsersTests
     public async Task GetBlockedUsers_ReturnBlocked()
     {
         // Arrange
-        FriendsService friendsService = _mock.Create<FriendsService>();
+        NetworkService networkService = _mock.Create<NetworkService>();
 
         UserRelation userRelation = new UserRelation()
         {
@@ -108,7 +108,7 @@ public class GetBlockedUsersTests
            .ReturnsDbSet(new List<UserRelation> { userRelation });
 
         // Act
-        Result<PagedList<BPUser>> result = await friendsService.GetBlockedUsers(_pagingParameters);
+        Result<PagedList<BPUser>> result = await networkService.GetBlockedUsers(_pagingParameters);
 
         // Assert
         Assert.IsTrue(result.Success);

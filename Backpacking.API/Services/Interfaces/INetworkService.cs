@@ -4,7 +4,7 @@ using Backpacking.API.Utils;
 
 namespace Backpacking.API.Services.Interfaces;
 
-public interface IFriendsService
+public interface INetworkService
 {
     Task<Result<PagedList<BPUser>>> SearchUsers(string? query, BPPagingParameters pagingParameters);
     Task<Result> UnfriendUser(Guid unfriendUserId);
