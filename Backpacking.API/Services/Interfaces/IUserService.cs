@@ -10,4 +10,5 @@ public interface IUserService
     Result<Guid> GetCurrentUserId();
     Task<Result<Guid>> RegisterUser(RegisterDTO registerDTO);
     Task<Result> LoginUser(string userName, string password);
+    Task<Result<BPUser>> UpdateCurrentUserProfile(UpdateProfileDTO updateProfileDTO);
 }

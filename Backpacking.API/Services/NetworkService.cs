@@ -21,6 +21,21 @@ public class NetworkService : INetworkService
     }
 
     /// <summary>
+    /// Get the user with the provided id given they are not blocking or
+    /// blocked by the current user
+    /// </summary>
+    /// <param name="id">The id of the user</param>
+    /// <returns>The user</returns>
+    public async Task<Result<BPUser>> GetUserById(Guid id)
+    {
+        return await ValidateId(id)
+            .Then(_userService.GetCurrentUserId)
+            .Then(userId => GuardUserIdsNotEqual(userId, id))
+            .Then(userId => GetUserById(id, userId))
+            .Then(GuardUserExists);
+    }
+
+    /// <summary>
     /// Given a query, will search for users that relate to it and that 
     /// are not blocked by or blocking the current user
     /// </summary>
@@ -176,6 +191,23 @@ public class NetworkService : INetworkService
     {
         return await _userService.GetCurrentUserId()
             .Then(userId => GetBlockedUsers(userId, pagingParameters));
+    }
+
+    /// <summary>
+    /// Gets a user based on the provided id, provided they are not blocked by
+    /// or blocking the current user.
+    /// </summary>
+    /// <param name="id">The id of the user to get</param>
+    /// <param name="currentUserId">The id of the current user</param>
+    /// <returns>The user</returns>
+    private async Task<Result<BPUser?>> GetUserById(Guid id, Guid currentUserId)
+    {
+        return await _bPContext.Users
+            .Include(user => user.SentUserRelations)
+            .Include(user => user.ReceivedUserRelations)
+            .Where(user => user.Id == id)
+            .FilterBlocked(currentUserId)
+            .FirstOrDefaultAsync();
     }
 
     /// <summary>
@@ -339,6 +371,21 @@ public class NetworkService : INetworkService
         }
 
         return Result.Ok();
+    }
+
+    /// <summary>
+    /// Guards whether a user exists
+    /// </summary>
+    /// <param name="userId">The user</param>
+    /// <returns>The user</returns>
+    private Result<BPUser> GuardUserExists(BPUser? user)
+    {
+        if (user is null)
+        {
+            return UserRelation.Errors.UserNotFound;
+        }
+
+        return user;
     }
 
     /// <summary>

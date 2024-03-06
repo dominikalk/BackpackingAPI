@@ -1,4 +1,5 @@
-﻿using Backpacking.API.Models;
+﻿using Backpacking.API.DbContexts;
+using Backpacking.API.Models;
 using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
@@ -13,15 +14,18 @@ public class UserService : IUserService
     private readonly UserManager<BPUser> _userManager;
     private readonly SignInManager<BPUser> _signInManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IBPContext _bPContext;
 
     public UserService(
         UserManager<BPUser> userManager,
         SignInManager<BPUser> signInManager,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IBPContext bPContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _httpContextAccessor = httpContextAccessor;
+        _bPContext = bPContext;
     }
 
     /// <summary>
@@ -100,6 +104,18 @@ public class UserService : IUserService
     }
 
     /// <summary>
+    /// Will update the current user's profile according to the dto provided
+    /// </summary>
+    /// <param name="updateProfileDTO">The update information</param>
+    /// <returns>The updated user</returns>
+    public async Task<Result<BPUser>> UpdateCurrentUserProfile(UpdateProfileDTO updateProfileDTO)
+    {
+        return await GetCurrentUser()
+            .Then(user => user.UpdateUserProfile(updateProfileDTO))
+            .Then(SaveChanges);
+    }
+
+    /// <summary>
     /// Will get the claims principle of the current user
     /// </summary>
     /// <returns>The claims principle of the current user</returns>
@@ -163,5 +179,16 @@ public class UserService : IUserService
         }
 
         return parsedGuid;
+    }
+
+    /// <summary>
+    /// Saves the changes made to the database context
+    /// </summary>
+    /// <param name="user">The user</param>
+    /// <returns>The user</returns>
+    private async Task<Result<BPUser>> SaveChanges(BPUser user)
+    {
+        await _bPContext.SaveChangesAsync();
+        return user;
     }
 }

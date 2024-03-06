@@ -6,6 +6,7 @@ namespace Backpacking.API.Services.Interfaces;
 
 public interface INetworkService
 {
+    Task<Result<BPUser>> GetUserById(Guid id);
     Task<Result<PagedList<BPUser>>> SearchUsers(string? query, BPPagingParameters pagingParameters);
     Task<Result> UnfriendUser(Guid unfriendUserId);
     Task<Result<PagedList<BPUser>>> GetFriends(BPPagingParameters pagingParameters);

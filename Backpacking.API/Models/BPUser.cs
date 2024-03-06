@@ -1,4 +1,5 @@
-﻿using Backpacking.API.Utils;
+﻿using Backpacking.API.Models.DTO.UserDTOs;
+using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
@@ -60,24 +61,18 @@ public class BPUser : IdentityUser<Guid>
         ReceivedUserRelations.Where(request => request.RelationType == UserRelationType.Pending);
 
     /// <summary>
-    /// The users who are friends with the user
+    /// Given an update profile dto, will update the user and return
+    /// the updated user
     /// </summary>
-    [NotMapped]
-    public IEnumerable<BPUser> Friends
+    /// <param name="updateProfileDTO">The update information</param>
+    /// <returns>The updated user</returns>
+    public Result<BPUser> UpdateUserProfile(UpdateProfileDTO updateProfileDTO)
     {
-        get
-        {
-            List<BPUser> friends = SentUserRelations
-                .Where(friend => friend.RelationType == UserRelationType.Friend)
-                .Select(friend => friend.SentTo)
-                .ToList();
+        FirstName = updateProfileDTO.FirstName;
+        LastName = updateProfileDTO.LastName;
+        Bio = updateProfileDTO.Bio;
 
-            friends.AddRange(ReceivedUserRelations
-                .Where(friend => friend.RelationType == UserRelationType.Friend)
-                .Select(friend => friend.SentBy));
-
-            return friends;
-        }
+        return this;
     }
 
     public class Errors

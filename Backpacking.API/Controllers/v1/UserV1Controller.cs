@@ -1,7 +1,9 @@
-﻿using Backpacking.API.Models.API;
+﻿using Backpacking.API.Models;
+using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backpacking.API.Controllers.v1;
@@ -45,6 +47,42 @@ public class UserV1Controller : ControllerBase
         IActionResult HandleSuccess()
         {
             return Ok();
+        }
+    }
+
+    [HttpGet("profile")]
+    [Authorize]
+    [EndpointName(nameof(GetProfile))]
+    public async Task<IActionResult> GetProfile()
+    {
+        Result<BPUser> response = await _userService.GetCurrentUser();
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(BPUser user)
+        {
+            BPApiResult<ProfileDTO> apiResult =
+                new BPApiResult<ProfileDTO>(new ProfileDTO(user), 1, 1);
+
+            return Ok(apiResult);
+        }
+    }
+
+    [HttpPut("profile")]
+    [Authorize]
+    [EndpointName(nameof(UpdateProfile))]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDTO updateProfileDTO)
+    {
+        Result<BPUser> response = await _userService.UpdateCurrentUserProfile(updateProfileDTO);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(BPUser user)
+        {
+            BPApiResult<ProfileDTO> apiResult =
+                new BPApiResult<ProfileDTO>(new ProfileDTO(user), 1, 1);
+
+            return Ok(apiResult);
         }
     }
 }

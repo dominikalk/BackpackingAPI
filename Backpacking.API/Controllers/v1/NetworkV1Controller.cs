@@ -14,10 +14,38 @@ namespace Backpacking.API.Controllers.v1;
 public class NetworkV1Controller : ControllerBase
 {
     private readonly INetworkService _networkService;
+    private readonly IUserService _userService;
 
-    public NetworkV1Controller(INetworkService networkService)
+    public NetworkV1Controller(
+        INetworkService networkService,
+        IUserService userService)
     {
         _networkService = networkService;
+        _userService = userService;
+    }
+
+    [HttpGet("{id:guid}")]
+    [EndpointName(nameof(GetUserProfileById))]
+    public async Task<IActionResult> GetUserProfileById(Guid id)
+    {
+        Result<Guid> currentUserId = _userService.GetCurrentUserId();
+
+        if (!currentUserId.Success)
+        {
+            return this.HandleError(currentUserId.Error);
+        }
+
+        Result<BPUser> response = await _networkService.GetUserById(id);
+
+        return response.Finally((user) => HandleSuccess(user, currentUserId.Value), this.HandleError);
+
+        IActionResult HandleSuccess(BPUser user, Guid currentUserId)
+        {
+            BPApiResult<UserProfileDTO> apiResult =
+                 new BPApiResult<UserProfileDTO>(new UserProfileDTO(user, currentUserId), 1, 1);
+
+            return Ok(apiResult);
+        }
     }
 
     [HttpGet("search")]
