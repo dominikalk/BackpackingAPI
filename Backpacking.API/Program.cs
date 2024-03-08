@@ -38,6 +38,7 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
 builder.Services.AddScoped<INetworkService, NetworkService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
 
 builder.Services.AddAuthorization();
 

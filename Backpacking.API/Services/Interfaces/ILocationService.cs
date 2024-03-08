@@ -10,6 +10,7 @@ public interface ILocationService
     Task<Result<Location?>> GetCurrentLocation();
     Task<Result<Location>> LogCurrentLocation(LogCurrentLocationDTO locationDTO);
     Task<Result<Location>> DepartCurrentLocation();
+    // TODO: Add LogPastVisitedLocation Method
     Task<Result<Location>> UpdateVisitedLocation(Guid id, UpdateVisitedLocationDTO locationDTO);
     Task<Result<Location>> LogPlannedLocation(LogPlannedLocationDTO locationDTO);
     Task<Result<Location>> UpdatePlannedLocation(Guid id, UpdatePlannedLocationDTO locationDTO);

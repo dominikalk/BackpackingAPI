@@ -1,6 +1,5 @@
 ﻿using Backpacking.API.Models.DTO.LocationDTOs;
 using Backpacking.API.Utils;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 
 namespace Backpacking.API.Models;
@@ -62,18 +61,6 @@ public class Location : IBPModel
     /// </summary>
     public DateTimeOffset LastModifiedDate { get; set; }
 
-    /// <summary>
-    /// True if the location is a visited location
-    /// </summary>
-    [NotMapped]
-    public bool IsVisitedLocation => LocationType == LocationType.VisitedLocation;
-
-    /// <summary>
-    /// True if the location is a planned location
-    /// </summary>
-    [NotMapped]
-    public bool IsPlannedLocation => LocationType == LocationType.PlannedLocation;
-
     public Location() { }
 
     /// <summary>
@@ -134,7 +121,7 @@ public class Location : IBPModel
     /// <returns>The updated location</returns>
     public Result<Location> UpdateVisitedLocation(UpdateVisitedLocationDTO dto)
     {
-        if (!IsVisitedLocation)
+        if (LocationType != LocationType.VisitedLocation)
         {
             return Errors.LocationVisited;
         }
@@ -155,7 +142,7 @@ public class Location : IBPModel
     /// <returns>The updated location</returns>
     public Result<Location> UpdatePlannedLocation(UpdatePlannedLocationDTO dto)
     {
-        if (!IsPlannedLocation)
+        if (LocationType != LocationType.PlannedLocation)
         {
             return Errors.LocationPlanned;
         }

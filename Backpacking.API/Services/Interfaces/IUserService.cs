@@ -8,6 +8,7 @@ public interface IUserService
 {
     Task<Result<BPUser>> GetCurrentUser();
     Result<Guid> GetCurrentUserId();
+    Task<Result<bool>> GetUserNameAvailable(string userName);
     Task<Result<Guid>> RegisterUser(RegisterDTO registerDTO);
     Task<Result> LoginUser(string userName, string password);
     Task<Result<BPUser>> UpdateCurrentUserProfile(UpdateProfileDTO updateProfileDTO);

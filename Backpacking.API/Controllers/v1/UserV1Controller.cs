@@ -19,6 +19,23 @@ public class UserV1Controller : ControllerBase
         _userService = userService;
     }
 
+    [HttpGet("available")]
+    [EndpointName(nameof(GetUserNameAvailable))]
+    public async Task<IActionResult> GetUserNameAvailable([FromQuery] string userName)
+    {
+        Result<bool> response = await _userService.GetUserNameAvailable(userName);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(bool available)
+        {
+            BPApiResult<Object> apiResult =
+                new BPApiResult<Object>(new { UserNameAvailable = available }, 1, 1);
+
+            return Ok(apiResult);
+        }
+    }
+
     [HttpPost("register")]
     [EndpointName(nameof(Register))]
     public async Task<IActionResult> Register(RegisterDTO registerDTO)

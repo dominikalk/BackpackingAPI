@@ -4,6 +4,7 @@ using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Security.Claims;
 
@@ -47,6 +48,18 @@ public class UserService : IUserService
         return GetClaimsPrinciple()
             .Then(GetUserId)
             .Then(ParseId);
+    }
+
+    /// <summary>
+    /// Given a username, will return whether a user with that username
+    /// already exists
+    /// </summary>
+    /// <param name="userName">The username to check</param>
+    /// <returns>Whether the username already exists</returns>
+    public async Task<Result<bool>> GetUserNameAvailable(string userName)
+    {
+        bool taken = await _bPContext.Users.AnyAsync(user => user.UserName!.ToLower() == userName.ToLower());
+        return taken == false;
     }
 
     /// <summary>
