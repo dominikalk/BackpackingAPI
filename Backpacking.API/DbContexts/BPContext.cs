@@ -22,6 +22,8 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
 
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<UserRelation> UserRelations => Set<UserRelation>();
+    public DbSet<Chat> Chats => Set<Chat>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

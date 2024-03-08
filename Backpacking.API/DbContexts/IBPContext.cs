@@ -13,6 +13,7 @@ public interface IBPContext
     DbSet<Location> Locations { get; }
     DbSet<UserRelation> UserRelations { get; }
     DbSet<BPUser> Users { get; }
+    DbSet<Chat> Chats { get; }
 
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class;

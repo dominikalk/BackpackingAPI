@@ -1,5 +1,4 @@
 ﻿using Backpacking.API.Utils;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 
 namespace Backpacking.API.Models;
