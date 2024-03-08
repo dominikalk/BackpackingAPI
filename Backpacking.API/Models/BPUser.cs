@@ -48,17 +48,15 @@ public class BPUser : IdentityUser<Guid>
     public IEnumerable<UserRelation> ReceivedUserRelations { get; set; } = new List<UserRelation>();
 
     /// <summary>
+    /// The chats that the user is part of
+    /// </summary>
+    public IEnumerable<Chat> Chats { get; set; } = new List<Chat>();
+
+    /// <summary>
     /// The full name of the user
     /// </summary>
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
-
-    /// <summary>
-    /// The pending friend requests for the user
-    /// </summary>
-    [NotMapped]
-    public IEnumerable<UserRelation> PendingUserRelations =>
-        ReceivedUserRelations.Where(request => request.RelationType == UserRelationType.Pending);
 
     /// <summary>
     /// Given an update profile dto, will update the user and return
