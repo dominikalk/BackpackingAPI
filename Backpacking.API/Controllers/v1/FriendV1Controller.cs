@@ -30,10 +30,10 @@ public class FriendV1Controller : ControllerBase
 
         IActionResult HandleSuccess(PagedList<Location> pagedLocations)
         {
-            IEnumerable<FriendLocationDTO> FriendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
+            IEnumerable<FriendLocationDTO> friendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
 
             BPPagedApiResult<FriendLocationDTO> pagedApiResult =
-                new BPPagedApiResult<FriendLocationDTO>(FriendLocationDTOs, pagedLocations.ToDetails());
+                new BPPagedApiResult<FriendLocationDTO>(friendLocationDTOs, pagedLocations.ToDetails());
 
             return Ok(pagedApiResult);
         }
@@ -49,10 +49,10 @@ public class FriendV1Controller : ControllerBase
 
         IActionResult HandleSuccess(PagedList<Location> pagedLocations)
         {
-            IEnumerable<FriendLocationDTO> FriendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
+            IEnumerable<FriendLocationDTO> friendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
 
             BPPagedApiResult<FriendLocationDTO> pagedApiResult =
-                new BPPagedApiResult<FriendLocationDTO>(FriendLocationDTOs, pagedLocations.ToDetails());
+                new BPPagedApiResult<FriendLocationDTO>(friendLocationDTOs, pagedLocations.ToDetails());
 
             return Ok(pagedApiResult);
         }
@@ -68,10 +68,10 @@ public class FriendV1Controller : ControllerBase
 
         IActionResult HandleSuccess(PagedList<Location> pagedLocations)
         {
-            IEnumerable<FriendLocationDTO> FriendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
+            IEnumerable<FriendLocationDTO> friendLocationDTOs = pagedLocations.Select(location => new FriendLocationDTO(location));
 
             BPPagedApiResult<FriendLocationDTO> pagedApiResult =
-                new BPPagedApiResult<FriendLocationDTO>(FriendLocationDTOs, pagedLocations.ToDetails());
+                new BPPagedApiResult<FriendLocationDTO>(friendLocationDTOs, pagedLocations.ToDetails());
 
             return Ok(pagedApiResult);
         }

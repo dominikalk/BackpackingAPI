@@ -39,6 +39,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
 builder.Services.AddScoped<INetworkService, NetworkService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddAuthorization();
 

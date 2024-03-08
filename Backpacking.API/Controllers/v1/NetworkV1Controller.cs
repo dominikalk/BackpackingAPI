@@ -77,7 +77,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
@@ -110,7 +110,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
@@ -124,7 +124,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
@@ -138,7 +138,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
@@ -171,7 +171,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
@@ -185,7 +185,7 @@ public class NetworkV1Controller : ControllerBase
 
         IActionResult HandleSuccess()
         {
-            return Ok();
+            return NoContent();
         }
     }
 
