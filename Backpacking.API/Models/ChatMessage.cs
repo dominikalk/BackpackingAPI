@@ -1,5 +1,9 @@
-﻿namespace Backpacking.API.Models;
+﻿using Backpacking.API.Utils;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Backpacking.API.Models;
+
+[Table("ChatMessage")]
 public class ChatMessage : IBPModel
 {
     /// <summary>
@@ -41,4 +45,24 @@ public class ChatMessage : IBPModel
     /// The date the chat message was last modified on
     /// </summary>
     public DateTimeOffset LastModifiedDate { get; set; }
+
+    /// <summary>
+    /// Given the chat id, user id, and message content will
+    /// return the chat message with those values.
+    /// </summary>
+    /// <param name="chatId">The chat's id</param>
+    /// <param name="userId">The user's id</param>
+    /// <param name="content">The message content</param>
+    /// <returns>The chat message</returns>
+    public static Result<ChatMessage> Create(Guid chatId, Guid userId, string content)
+    {
+        ChatMessage chatMessage = new ChatMessage()
+        {
+            UserId = userId,
+            ChatId = chatId,
+            Content = content
+        };
+
+        return chatMessage;
+    }
 }

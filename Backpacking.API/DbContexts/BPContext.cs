@@ -23,6 +23,7 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<UserRelation> UserRelations => Set<UserRelation>();
     public DbSet<Chat> Chats => Set<Chat>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -69,8 +70,10 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
         {
             if (insertedEntry is IBPModel applicationModel)
             {
-                applicationModel.CreatedDate = DateTimeOffset.UtcNow;
-                applicationModel.LastModifiedDate = DateTimeOffset.UtcNow;
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                applicationModel.CreatedDate = now;
+                applicationModel.LastModifiedDate = now;
             }
         }
 

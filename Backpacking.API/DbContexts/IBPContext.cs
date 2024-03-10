@@ -14,6 +14,7 @@ public interface IBPContext
     DbSet<UserRelation> UserRelations { get; }
     DbSet<BPUser> Users { get; }
     DbSet<Chat> Chats { get; }
+    DbSet<ChatMessage> ChatMessages { get; }
 
     Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class;

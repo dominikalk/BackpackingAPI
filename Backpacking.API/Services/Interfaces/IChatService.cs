@@ -7,6 +7,7 @@ namespace Backpacking.API.Services.Interfaces;
 
 public interface IChatService
 {
+    // TODO: Add Get All Unread Count Method
     Task<Result<PagedList<Chat>>> GetChats(BPPagingParameters pagingParameters);
     Task<Result<Chat>> GetChatById(Guid chatId);
     Task<Result<PagedList<ChatMessage>>> GetChatMessages(Guid chatId, BPPagingParameters pagingParameters);

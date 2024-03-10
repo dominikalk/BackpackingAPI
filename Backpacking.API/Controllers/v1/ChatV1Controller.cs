@@ -68,8 +68,8 @@ public class ChatV1Controller : ControllerBase
 
         IActionResult HandleSuccess(Chat chat, Guid currentUserId)
         {
-            BPApiResult<ChatDTO> apiResult =
-                new BPApiResult<ChatDTO>(new ChatDTO(chat, currentUserId), 1, 1);
+            BPApiResult<ChatDetailsDTO> apiResult =
+                new BPApiResult<ChatDetailsDTO>(new ChatDetailsDTO(chat, currentUserId), 1, 1);
 
             return Ok(apiResult);
         }
@@ -118,8 +118,8 @@ public class ChatV1Controller : ControllerBase
 
         IActionResult HandleSuccess(Chat chat, Guid currentUserId)
         {
-            BPApiResult<ChatDTO> apiResult =
-                new BPApiResult<ChatDTO>(new ChatDTO(chat, currentUserId), 1, 1);
+            BPApiResult<ChatDetailsDTO> apiResult =
+                new BPApiResult<ChatDetailsDTO>(new ChatDetailsDTO(chat, currentUserId), 1, 1);
 
             return CreatedAtAction(nameof(GetChatById), new { id = chat.Id }, apiResult);
         }
