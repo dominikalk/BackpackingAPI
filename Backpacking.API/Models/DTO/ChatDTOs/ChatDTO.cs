@@ -4,6 +4,7 @@ public class ChatDTO
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public int UnreadCount { get; set; }
 
     public ChatDTO(Chat chat, Guid currentUserId)
     {
@@ -13,7 +14,6 @@ public class ChatDTO
             chat.Users
                 .Where(user => user.Id != currentUserId)
                 .Select(user => user.FullName));
+        UnreadCount = Chat.GetChatUnreadCount(chat, currentUserId);
     }
-
-    // TODO: Add Unread Count
 }

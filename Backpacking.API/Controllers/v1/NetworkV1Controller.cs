@@ -67,7 +67,7 @@ public class NetworkV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("unfriend/{userId:guid}")]
+    [HttpDelete("unfriend/{userId:guid}")]
     [EndpointName(nameof(UnfriendUser))]
     public async Task<IActionResult> UnfriendUser(Guid userId)
     {
@@ -114,7 +114,7 @@ public class NetworkV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("request/accept/{requestId:guid}")]
+    [HttpPatch("request/accept/{requestId:guid}")]
     [EndpointName(nameof(AcceptFriendRequest))]
     public async Task<IActionResult> AcceptFriendRequest(Guid requestId)
     {
@@ -128,7 +128,7 @@ public class NetworkV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("request/reject/{requestId:guid}")]
+    [HttpDelete("request/reject/{requestId:guid}")]
     [EndpointName(nameof(RejectFriendRequest))]
     public async Task<IActionResult> RejectFriendRequest(Guid requestId)
     {
@@ -175,7 +175,7 @@ public class NetworkV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("unblock/{userId:guid}")]
+    [HttpDelete("unblock/{userId:guid}")]
     [EndpointName(nameof(UnblockUser))]
     public async Task<IActionResult> UnblockUser(Guid userId)
     {

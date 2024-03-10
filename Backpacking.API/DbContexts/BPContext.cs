@@ -41,6 +41,8 @@ public class BPContext : IdentityDbContext<BPUser, IdentityRole<Guid>, Guid>, IB
             .HasOne<BPUser>(a => a.SentTo)
             .WithMany(b => b.ReceivedUserRelations)
             .HasForeignKey(c => c.SentToId);
+
+        modelBuilder.Entity<ChatUserRead>().HasKey(c => new { c.ChatId, c.UserId });
     }
 
     public new async Task<Result> SaveChangesAsync(CancellationToken cancellationToken)

@@ -5,6 +5,8 @@ public class ChatDetailsDTO
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public IEnumerable<ChatDetailsDTOUser> Users { get; set; } = new List<ChatDetailsDTOUser>();
+    public int UnreadCount { get; set; }
+
 
     public ChatDetailsDTO(Chat chat, Guid currentUserId)
     {
@@ -15,9 +17,8 @@ public class ChatDetailsDTO
         Users = chat.Users
             .Where(user => user.Id != currentUserId)
             .Select(user => new ChatDetailsDTOUser(user));
+        UnreadCount = Chat.GetChatUnreadCount(chat, currentUserId);
     }
-
-    // TODO: Add Unread Count
 }
 
 public class ChatDetailsDTOUser

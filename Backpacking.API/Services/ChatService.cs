@@ -96,6 +96,37 @@ public class ChatService : IChatService
     }
 
     /// <summary>
+    /// Given a chat id, if the current user is a participant will
+    /// update the last read date for the current user
+    /// </summary>
+    /// <param name="chatId">The chat's id</param>
+    /// <returns>The updated chat</returns>
+    public async Task<Result<Chat>> ReadChat(Guid chatId)
+    {
+        Result<Guid> userId = _userService.GetCurrentUserId();
+
+        if (!userId.Success)
+        {
+            return userId.Error;
+        }
+
+        return await ValidateId(chatId)
+            .Then(() => GetUserChatById(userId.Value, chatId))
+            .Then(chat => ReadChat(chat, userId.Value))
+            .Then(SaveChanges);
+    }
+
+    /// <summary>
+    /// Gets the current user's unread message count in all their chats
+    /// </summary>
+    /// <returns>The unread message count</returns>
+    public async Task<Result<int>> GetUnreadChatCount()
+    {
+        return await _userService.GetCurrentUserId()
+            .Then(GetUnreadChatCount);
+    }
+
+    /// <summary>
     /// Given a user id, will return the chats the user is part of
     /// in descending order from the last modified date.
     /// </summary>
@@ -112,6 +143,45 @@ public class ChatService : IChatService
                     .OrderByDescending(message => message.CreatedDate)
                     .First().CreatedDate)
             .ToPagedListAsync(pagingParameters);
+    }
+
+    /// <summary>
+    /// Given a user's id, will compute the number of unread messages
+    /// they have in all their chats.
+    /// </summary>
+    /// <param name="userId">The user's id</param>
+    /// <returns>The user's unread message count</returns>
+    private async Task<Result<int>> GetUnreadChatCount(Guid userId)
+    {
+        List<Chat> chats = await _bPContext.Chats
+            .Include(chat => chat.Users)
+            .Include(chat => chat.Messages)
+            .Where(chat =>
+                // Check user is in chat
+                chat.Users.Any(user => user.Id == userId)
+                // Check last message is not from user
+                && chat.Messages
+                        .OrderByDescending(message => message.CreatedDate)
+                        .First().UserId != userId
+                // Check last message sent after user last read chat
+                && (chat.UserLastReadDate
+                    .SingleOrDefault(chatUserRead => chatUserRead.UserId == userId) == null
+                        ? DateTimeOffset.MinValue
+                        : chat.UserLastReadDate
+                            .Single(chatUserRead => chatUserRead.UserId == userId).LastReadDate)
+                    < chat.Messages
+                        .OrderByDescending(message => message.CreatedDate)
+                        .First().CreatedDate)
+            .ToListAsync();
+
+        int unreadCount = 0;
+
+        foreach (Chat chat in chats)
+        {
+            unreadCount += Chat.GetChatUnreadCount(chat, userId);
+        }
+
+        return unreadCount;
     }
 
     /// <summary>
@@ -151,6 +221,8 @@ public class ChatService : IChatService
     {
         Chat? chat = await _bPContext.Chats
             .Include(chat => chat.Users)
+            .Include(chat => chat.Messages)
+            .Include(chat => chat.UserLastReadDate)
             .FirstOrDefaultAsync(chat => chat.Id == chatId);
 
         if (chat is null)
@@ -223,6 +295,34 @@ public class ChatService : IChatService
         }
 
         return new ChatUsers(friendRelation.SentTo, friendRelation.SentBy);
+    }
+
+    /// <summary>
+    /// Given a chat and a user's id, will add/ modify the 
+    /// chat user read last read date
+    /// </summary>
+    /// <param name="chat">The chat</param>
+    /// <param name="userId">The user's id</param>
+    /// <returns>The chat</returns>
+    private Result<Chat> ReadChat(Chat chat, Guid userId)
+    {
+        ChatUserRead? chatUserRead = chat.UserLastReadDate
+            .SingleOrDefault(chatUserRead => chatUserRead.UserId == userId);
+
+        if (chatUserRead is null)
+        {
+            ChatUserRead newChatUserRead = new ChatUserRead()
+            {
+                ChatId = chat.Id,
+                UserId = userId,
+                LastReadDate = DateTimeOffset.UtcNow
+            };
+            chat.UserLastReadDate.Add(newChatUserRead);
+            return chat;
+        }
+
+        chatUserRead.LastReadDate = DateTimeOffset.UtcNow;
+        return chat;
     }
 
     /// <summary>

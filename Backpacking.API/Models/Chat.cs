@@ -21,6 +21,11 @@ public class Chat : IBPModel
     public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
 
     /// <summary>
+    /// The last read date of the users
+    /// </summary>
+    public ICollection<ChatUserRead> UserLastReadDate { get; set; } = new List<ChatUserRead>();
+
+    /// <summary>
     /// The date the chat was created on
     /// </summary>
     public DateTimeOffset CreatedDate { get; set; }
@@ -51,6 +56,28 @@ public class Chat : IBPModel
         chat.Users.Add(friend);
 
         return chat;
+    }
+
+    /// <summary>
+    /// Given a chat and the user's id, will return the chat's 
+    /// unread message count for the user.
+    /// </summary>
+    /// <param name="chat">The chat</param>
+    /// <param name="userId">The user;s id</param>
+    /// <returns>The chat unread messages count for the user</returns>
+    public static int GetChatUnreadCount(Chat chat, Guid userId)
+    {
+        ChatUserRead? chatUserRead = chat.UserLastReadDate
+            .SingleOrDefault(chatUserRead => chatUserRead.UserId == userId);
+
+        int unreadCount = chat.Messages
+            .OrderByDescending(message => message.CreatedDate)
+            .TakeWhile(message =>
+                message.UserId != userId
+                && message.CreatedDate > (chatUserRead?.LastReadDate ?? DateTimeOffset.MinValue))
+            .Count();
+
+        return unreadCount;
     }
 
     public class Errors
