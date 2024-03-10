@@ -59,5 +59,6 @@ public class Chat : IBPModel
         public static BPError ChatNotFound = new BPError(HttpStatusCode.NotFound, "Chat not found.");
         public static BPError UsersNotFriends = new BPError(HttpStatusCode.BadRequest, "Users are not friends or friends doesn't exist.");
         public static BPError ChatExists = new BPError(HttpStatusCode.BadRequest, "A private chat with the user already exists.");
+        public static BPError RelationIdNotUserId = new BPError(HttpStatusCode.BadRequest, "Relation Id cannot be user's Id.");
     }
 }

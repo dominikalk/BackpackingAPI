@@ -61,9 +61,9 @@ public class ChatService : IChatService
     }
 
     /// <summary>
-    /// Given a friends id and the content of the first message, will
+    /// Given a friend's id and the content of the first message, will
     /// create a private chat with the message given the chat doesn't already
-    /// exist and the user's are friends.
+    /// exist and the users are friends.
     /// </summary>
     /// <param name="createPrivateChatDTO">Then user's id and the message content</param>
     /// <returns>The private chat</returns>
@@ -106,8 +106,11 @@ public class ChatService : IChatService
     {
         return await _bPContext.Chats
             .Include(chat => chat.Users)
+            .Include(chat => chat.Messages)
             .Where(chat => chat.Users.Any(user => user.Id == userId))
-            .OrderByDescending(chat => chat.LastModifiedDate)
+            .OrderByDescending(chat => chat.Messages
+                    .OrderByDescending(message => message.CreatedDate)
+                    .First().CreatedDate)
             .ToPagedListAsync(pagingParameters);
     }
 
@@ -232,7 +235,7 @@ public class ChatService : IChatService
     {
         if (userId == relationId)
         {
-            return UserRelation.Errors.RelationIdNotUserId;
+            return Chat.Errors.RelationIdNotUserId;
         }
 
         return userId;
