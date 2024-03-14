@@ -5,6 +5,7 @@ using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Backpacking.API.Controllers.v1;
 
@@ -68,8 +69,8 @@ public class ChatV1Controller : ControllerBase
 
         IActionResult HandleSuccess(Chat chat, Guid currentUserId)
         {
-            BPApiResult<ChatDTO> apiResult =
-                new BPApiResult<ChatDTO>(new ChatDTO(chat, currentUserId), 1, 1);
+            BPApiResult<PrivateChatDetailsDTO> apiResult =
+                new BPApiResult<PrivateChatDetailsDTO>(new PrivateChatDetailsDTO(chat, currentUserId), 1, 1);
 
             return Ok(apiResult);
         }
@@ -118,8 +119,8 @@ public class ChatV1Controller : ControllerBase
 
         IActionResult HandleSuccess(Chat chat, Guid currentUserId)
         {
-            BPApiResult<ChatDTO> apiResult =
-                new BPApiResult<ChatDTO>(new ChatDTO(chat, currentUserId), 1, 1);
+            BPApiResult<ChatDetailsDTO> apiResult =
+                new BPApiResult<ChatDetailsDTO>(new ChatDetailsDTO(chat, currentUserId), 1, 1);
 
             return CreatedAtAction(nameof(GetChatById), new { id = chat.Id }, apiResult);
         }
@@ -146,6 +147,47 @@ public class ChatV1Controller : ControllerBase
                 new BPApiResult<ChatMessageDTO>(new ChatMessageDTO(chatMessage, currentUserId), 1, 1);
 
             return CreatedAtAction(nameof(GetChatMessages), new { chatId }, apiResult);
+        }
+    }
+
+    [HttpPatch("{chatId:guid}/read")]
+    [EndpointName(nameof(ReadChat))]
+    public async Task<IActionResult> ReadChat(Guid chatId)
+    {
+        Result<Guid> currentUserId = _userService.GetCurrentUserId();
+
+        if (!currentUserId.Success)
+        {
+            return this.HandleError(currentUserId.Error);
+        }
+
+        Result<Chat> response = await _chatService.ReadChat(chatId);
+
+        return response.Finally(chat => HandleSuccess(chat, currentUserId.Value), this.HandleError);
+
+        IActionResult HandleSuccess(Chat chat, Guid currentUserId)
+        {
+            BPApiResult<ChatDetailsDTO> apiResult =
+                new BPApiResult<ChatDetailsDTO>(new ChatDetailsDTO(chat, currentUserId), 1, 1);
+
+            return Ok(apiResult);
+        }
+    }
+
+    [HttpGet("unread")]
+    [EndpointName(nameof(GetUnreadChatCount))]
+    public async Task<IActionResult> GetUnreadChatCount()
+    {
+        Result<int> response = await _chatService.GetUnreadChatCount();
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess(int unreadChatCount)
+        {
+            BPApiResult<Object> apiResult =
+               new BPApiResult<Object>(new { unreadChatCount }, 1, 1);
+
+            return Ok(apiResult);
         }
     }
 }

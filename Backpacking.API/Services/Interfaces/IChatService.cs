@@ -12,4 +12,6 @@ public interface IChatService
     Task<Result<PagedList<ChatMessage>>> GetChatMessages(Guid chatId, BPPagingParameters pagingParameters);
     Task<Result<Chat>> CreatePrivateChat(CreatePrivateChatDTO createPrivateChatDTO);
     Task<Result<ChatMessage>> CreateChatMessage(Guid chatId, CreateChatMessageDTO createChatMessageDTO);
+    Task<Result<Chat>> ReadChat(Guid chatId);
+    Task<Result<int>> GetUnreadChatCount();
 }
