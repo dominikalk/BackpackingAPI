@@ -1,9 +1,11 @@
 ﻿using Backpacking.API.DbContexts;
+using Backpacking.API.Hubs;
 using Backpacking.API.Models;
 using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.ChatDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backpacking.API.Services;
@@ -12,13 +14,16 @@ public class ChatService : IChatService
 {
     private readonly IBPContext _bPContext;
     private readonly IUserService _userService;
+    private readonly IHubContext<ChatHub> _chatHubContext;
 
     public ChatService(
         IBPContext bPContext,
-        IUserService userService)
+        IUserService userService,
+        IHubContext<ChatHub> chatHubContext)
     {
         _bPContext = bPContext;
         _userService = userService;
+        _chatHubContext = chatHubContext;
     }
 
     /// <summary>
@@ -69,13 +74,24 @@ public class ChatService : IChatService
     /// <returns>The private chat</returns>
     public async Task<Result<Chat>> CreatePrivateChat(CreatePrivateChatDTO createPrivateChatDTO)
     {
-        return await ValidateId(createPrivateChatDTO.UserId)
+        Result<Chat> chat = await ValidateId(createPrivateChatDTO.UserId)
             .Then(_userService.GetCurrentUserId)
             .Then(userId => GuardUserIdsNotEqual(userId, createPrivateChatDTO.UserId))
             .Then(userId => ValidatePrivateChatCreatable(userId, createPrivateChatDTO.UserId))
             .Then(chatUsers => Chat.CreatePrivateChat(chatUsers.User, chatUsers.Friend, createPrivateChatDTO.Content))
             .Then(AddChat)
             .Then(SaveChanges);
+
+        // Send SignalR Update To Other User
+        if (chat.Success)
+        {
+            await _chatHubContext.Clients.User(createPrivateChatDTO.UserId.ToString()).SendAsync(
+                "ReceiveNewChat",
+                new { ChatId = chat.Value.Id }
+            );
+        }
+
+        return chat;
     }
 
     /// <summary>
@@ -87,12 +103,32 @@ public class ChatService : IChatService
     /// <returns>The chat message</returns>
     public async Task<Result<ChatMessage>> CreateChatMessage(Guid chatId, CreateChatMessageDTO createChatMessageDTO)
     {
-        return await ValidateId(chatId)
+        Result<ChatMessage> message = await ValidateId(chatId)
             .Then(_userService.GetCurrentUserId)
-            .Then(userId => ValidateUserInChat(userId, chatId))
+            .Then(userId => ValidateChatMessageCreatable(userId, chatId))
             .Then(userId => ChatMessage.Create(chatId, userId, createChatMessageDTO.Content))
             .Then(AddChatMessage)
             .Then(SaveChanges);
+
+        // Send SignalR Update To Other Chat Users
+        if (message.Success)
+        {
+            Chat chat = await _bPContext.Chats
+                .Include(chat => chat.Users)
+                .FirstAsync(chat => chat.Id == chatId);
+
+            IReadOnlyList<string> userIds = chat.Users
+                .Where(user => user.Id != message.Value.UserId)
+                .Select(user => user.Id.ToString())
+                .ToList();
+
+            await _chatHubContext.Clients.Users(userIds).SendAsync(
+                "ReceiveNewMessage",
+                new { ChatId = chatId }
+            );
+        }
+
+        return message;
     }
 
     /// <summary>
@@ -211,6 +247,41 @@ public class ChatService : IChatService
     }
 
     /// <summary>
+    /// Given a user id and chat id, will validate if the chat exists
+    /// and if the user is a participant. Additionally, if it is a private
+    /// chat, will validate the participants are still friends.
+    /// </summary>
+    /// <param name="userId">The user's id</param>
+    /// <param name="chatId">The chat's id</param>
+    /// <returns>The user's id</returns>
+    private async Task<Result<Guid>> ValidateChatMessageCreatable(Guid userId, Guid chatId)
+    {
+        Chat? chat = await _bPContext.Chats
+            .Include(chat => chat.Users)
+            .FirstOrDefaultAsync(chat => chat.Id == chatId);
+
+        if (chat is null)
+        {
+            return Chat.Errors.ChatNotFound;
+        }
+
+        if (!chat.Users.Any(user => user.Id == userId))
+        {
+            return Chat.Errors.ChatNotFound;
+        }
+
+        // If Private Chat
+        if (chat.Users.Count() == 2)
+        {
+            Guid friendId = chat.Users.First(user => user.Id != userId).Id;
+
+            return await ValidateFriends(userId, friendId);
+        }
+
+        return userId;
+    }
+
+    /// <summary>
     /// Given a user id and chat id, will get the chat with that id
     /// given the user is a participant
     /// </summary>
@@ -221,6 +292,9 @@ public class ChatService : IChatService
     {
         Chat? chat = await _bPContext.Chats
             .Include(chat => chat.Users)
+                .ThenInclude(user => user.SentUserRelations)
+            .Include(chat => chat.Users)
+                .ThenInclude(user => user.ReceivedUserRelations)
             .Include(chat => chat.Messages)
             .Include(chat => chat.UserLastReadDate)
             .FirstOrDefaultAsync(chat => chat.Id == chatId);
@@ -253,6 +327,34 @@ public class ChatService : IChatService
     }
 
     /// <summary>
+    /// Given a user's id and a friend's id, will validate whether 
+    /// they are actually friends
+    /// </summary>
+    /// <param name="userId">The user's id</param>
+    /// <param name="friendId">The friend's id</param>
+    /// <returns>The user's id</returns>
+    private async Task<Result<Guid>> ValidateFriends(Guid userId, Guid friendId)
+    {
+        UserRelation? friendRelation = await _bPContext.UserRelations
+            .Include(relation => relation.SentBy)
+            .Include(relation => relation.SentTo)
+            .Where(relation =>
+                relation.RelationType == UserRelationType.Friend
+                && ((relation.SentById == userId
+                && relation.SentToId == friendId)
+                || (relation.SentById == friendId
+                && relation.SentToId == userId)))
+            .FirstOrDefaultAsync();
+
+        if (friendRelation is null)
+        {
+            return Chat.Errors.UsersNotFriends;
+        }
+
+        return userId;
+    }
+
+    /// <summary>
     /// Given a user id and a friend id, will validate whether they are friends
     /// and whether a private chat between the two already exists.
     /// </summary>
@@ -266,10 +368,10 @@ public class ChatService : IChatService
             .Include(relation => relation.SentTo)
             .Where(relation =>
                 relation.RelationType == UserRelationType.Friend
-                && (relation.SentById == userId
+                && ((relation.SentById == userId
                 && relation.SentToId == friendId)
                 || (relation.SentById == friendId
-                && relation.SentToId == userId))
+                && relation.SentToId == userId)))
             .FirstOrDefaultAsync();
 
         if (friendRelation is null)

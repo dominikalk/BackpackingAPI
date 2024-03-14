@@ -69,8 +69,8 @@ public class ChatV1Controller : ControllerBase
 
         IActionResult HandleSuccess(Chat chat, Guid currentUserId)
         {
-            BPApiResult<ChatDetailsDTO> apiResult =
-                new BPApiResult<ChatDetailsDTO>(new ChatDetailsDTO(chat, currentUserId), 1, 1);
+            BPApiResult<PrivateChatDetailsDTO> apiResult =
+                new BPApiResult<PrivateChatDetailsDTO>(new PrivateChatDetailsDTO(chat, currentUserId), 1, 1);
 
             return Ok(apiResult);
         }

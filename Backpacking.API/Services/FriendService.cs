@@ -141,8 +141,8 @@ public class FriendService : IFriendService
     {
         bool friends = await _bPContext.UserRelations.AnyAsync(relation =>
             relation.RelationType == UserRelationType.Friend
-            && (relation.SentById == userId && relation.SentToId == friendId)
-            || (relation.SentById == friendId && relation.SentToId == userId));
+            && ((relation.SentById == userId && relation.SentToId == friendId)
+            || (relation.SentById == friendId && relation.SentToId == userId)));
 
         if (!friends)
         {

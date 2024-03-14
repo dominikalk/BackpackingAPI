@@ -1,4 +1,5 @@
 using Backpacking.API.DbContexts;
+using Backpacking.API.Hubs;
 using Backpacking.API.Models;
 using Backpacking.API.Services;
 using Backpacking.API.Services.Interfaces;
@@ -34,6 +35,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
+builder.Services.AddSignalR();
+
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
@@ -60,6 +63,8 @@ app.MapIdentityApi<BPUser>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.MapHub<ChatHub>("/chathub");
 
 app.MapControllers();
 

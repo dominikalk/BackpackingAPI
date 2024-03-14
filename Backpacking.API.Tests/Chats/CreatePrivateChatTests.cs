@@ -6,6 +6,9 @@ using Backpacking.API.Services;
 using Backpacking.API.Utils;
 using Moq.EntityFrameworkCore;
 using Backpacking.API.Models.DTO.ChatDTOs;
+using Backpacking.API.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Moq;
 
 namespace Backpacking.API.Tests.Chats;
 
@@ -29,6 +32,15 @@ public class CreatePrivateChatTests
         _mock.Mock<IUserService>()
             .Setup(service => service.GetCurrentUserId())
             .Returns(Result<Guid>.Ok(_userId));
+
+        Mock<IHubClients> mockClients = new Mock<IHubClients>();
+        mockClients
+            .Setup(clients => clients.User(It.IsAny<string>()))
+            .Returns(new Mock<IClientProxy>().Object);
+
+        _mock.Mock<IHubContext<ChatHub>>()
+            .Setup(context => context.Clients)
+            .Returns(mockClients.Object);
 
         _mock.Mock<IBPContext>()
             .Setup(context => context.Chats)
