@@ -174,6 +174,7 @@ public class ChatService : IChatService
         return await _bPContext.Chats
             .Include(chat => chat.Users)
             .Include(chat => chat.Messages)
+            .Include(chat => chat.UserLastReadDate)
             .Where(chat => chat.Users.Any(user => user.Id == userId))
             .OrderByDescending(chat => chat.Messages
                     .OrderByDescending(message => message.CreatedDate)

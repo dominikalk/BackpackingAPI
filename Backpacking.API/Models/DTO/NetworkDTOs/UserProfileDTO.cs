@@ -8,7 +8,7 @@ public class UserProfileDTO
     public string UserName { get; set; } = string.Empty;
     public string? Bio { get; set; }
     public DateTimeOffset JoinedDate { get; set; }
-    public bool IsFriend { get; set; }
+    public string Relation { get; set; }
 
     public UserProfileDTO(BPUser user, Guid currentUserId)
     {
@@ -18,8 +18,35 @@ public class UserProfileDTO
         UserName = user.UserName ?? string.Empty;
         Bio = user.Bio;
         JoinedDate = user.JoinedDate;
-        IsFriend =
-            user.SentUserRelations.Any(relation => relation.SentToId == currentUserId)
-            || user.ReceivedUserRelations.Any(relation => relation.SentById == currentUserId);
+        Relation = GetUserRelation(user, currentUserId);
+    }
+
+    private string GetUserRelation(BPUser user, Guid currentUserId)
+    {
+        UserRelation? sentRelation = user.SentUserRelations
+            .Where(relation => relation.SentToId == currentUserId)
+            .FirstOrDefault();
+
+        UserRelation? receivedRelation = user.ReceivedUserRelations
+            .Where(relation => relation.SentById == currentUserId)
+            .FirstOrDefault();
+
+        if (sentRelation?.RelationType == UserRelationType.Friend
+            || receivedRelation?.RelationType == UserRelationType.Friend)
+        {
+            return "friend";
+        }
+
+        if (sentRelation?.RelationType == UserRelationType.Pending)
+        {
+            return "requestReceived";
+        }
+
+        if (receivedRelation?.RelationType == UserRelationType.Pending)
+        {
+            return "requestSent";
+        }
+
+        return "none";
     }
 }
