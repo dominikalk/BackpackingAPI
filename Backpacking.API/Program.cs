@@ -46,8 +46,18 @@ builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityApiEndpoints<BPUser>()
+# region IdentityEndpoints
+//builder.Services.AddIdentityApiEndpoints<BPUser>()
+//    .AddEntityFrameworkStores<BPContext>();
+#endregion
+
+# region IdentityServices
+builder.Services.AddIdentity<BPUser, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<BPContext>();
+
+builder.Services.AddAuthentication()
+    .AddBearerToken(IdentityConstants.BearerScheme);
+#endregion
 
 var app = builder.Build();
 
@@ -58,7 +68,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapIdentityApi<BPUser>();
+# region IdentityEndpointsMap
+//app.MapIdentityApi<BPUser>();
+# endregion
 
 app.UseHttpsRedirection();
 

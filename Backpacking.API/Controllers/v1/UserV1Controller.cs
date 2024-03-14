@@ -3,7 +3,9 @@ using Backpacking.API.Models.API;
 using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backpacking.API.Controllers.v1;
@@ -55,16 +57,12 @@ public class UserV1Controller : ControllerBase
 
     [HttpPost("login")]
     [EndpointName(nameof(Login))]
-    public async Task<IActionResult> Login(LoginDTO loginDTO)
+    public async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> Login(LoginDTO loginDTO)
     {
-        Result response = await _userService.LoginUser(loginDTO.UserName, loginDTO.Password);
+        Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult> response =
+            await _userService.LoginUser(loginDTO.UserName, loginDTO.Password);
 
-        return response.Finally(HandleSuccess, this.HandleError);
-
-        IActionResult HandleSuccess()
-        {
-            return Ok();
-        }
+        return response;
     }
 
     [HttpGet("profile")]

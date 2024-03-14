@@ -3,12 +3,16 @@ using Backpacking.API.Models;
 using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Security.Claims;
 
 namespace Backpacking.API.Services;
+
+// Default Identity Endpoints Source Code: https://github.com/dotnet/aspnetcore/blob/main/src/Identity/Core/src/IdentityApiEndpointRouteBuilderExtensions.cs
 
 public class UserService : IUserService
 {
@@ -94,26 +98,23 @@ public class UserService : IUserService
     /// </summary>
     /// <param name="userName">The username of the user</param>
     /// <param name="password">The password of the user</param>
-    /// <returns>Ok Result</returns>
-    public async Task<Result> LoginUser(string userName, string password)
+    /// <returns>HttpResult or AccessTokenResponse</returns>
+    public async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> LoginUser(string userName, string password)
     {
+        _signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
+
         SignInResult result = await _signInManager.PasswordSignInAsync(
             userName,
             password,
             isPersistent: false,
             lockoutOnFailure: false);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            return Result.Ok();
+            return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
         }
 
-        if (result.IsLockedOut)
-        {
-            return new BPError(HttpStatusCode.BadRequest, "User locked out.");
-        }
-
-        return new BPError(HttpStatusCode.BadRequest, "Failed to log in.");
+        return TypedResults.Empty;
     }
 
     /// <summary>

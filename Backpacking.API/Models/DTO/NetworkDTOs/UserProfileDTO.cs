@@ -1,4 +1,6 @@
-﻿namespace Backpacking.API.Models.DTO.NetworkDTOs;
+﻿using Backpacking.API.Utils;
+
+namespace Backpacking.API.Models.DTO.NetworkDTOs;
 
 public class UserProfileDTO
 {
@@ -34,19 +36,31 @@ public class UserProfileDTO
         if (sentRelation?.RelationType == UserRelationType.Friend
             || receivedRelation?.RelationType == UserRelationType.Friend)
         {
-            return "friend";
+            return UserProfileRelation.Friend.ToStringValue();
         }
 
         if (sentRelation?.RelationType == UserRelationType.Pending)
         {
-            return "requestReceived";
+            return UserProfileRelation.RequestReceived.ToStringValue();
         }
 
         if (receivedRelation?.RelationType == UserRelationType.Pending)
         {
-            return "requestSent";
+            return UserProfileRelation.RequestSent.ToStringValue();
         }
 
-        return "none";
+        return UserProfileRelation.None.ToStringValue();
     }
+}
+
+public enum UserProfileRelation
+{
+    [StringValue("none")]
+    None,
+    [StringValue("requestReceived")]
+    RequestReceived,
+    [StringValue("requestSent")]
+    RequestSent,
+    [StringValue("friend")]
+    Friend
 }

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Backpacking.API.Utils;
 
@@ -36,11 +35,11 @@ public static class StringValue
 
         FieldInfo? fieldInfo = type.GetField(value.ToString());
 
-        DescriptionAttribute[] attribs = fieldInfo?
+        StringValueAttribute[] attribs = fieldInfo?
             .GetCustomAttributes(typeof(StringValueAttribute), false)
-            as DescriptionAttribute[] ?? [];
+            as StringValueAttribute[] ?? [];
 
-        return attribs.Length > 0 ? attribs[0].Description : string.Empty;
+        return attribs.Length > 0 ? attribs[0].StringValue : string.Empty;
     }
 }
 
