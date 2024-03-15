@@ -33,6 +33,7 @@ builder.Services.AddDbContext<IBPContext, BPContext>(options =>
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = true;
 });
 
 builder.Services.AddSignalR();
@@ -43,6 +44,7 @@ builder.Services.AddScoped<IGeocodingService, MixedGeocodingService>();
 builder.Services.AddScoped<INetworkService, NetworkService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IEmailSender<BPUser>, LocalEmailSender<BPUser>>();
 
 builder.Services.AddAuthorization();
 
