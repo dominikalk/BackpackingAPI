@@ -13,6 +13,7 @@ public class RegisterDTO
     public required string LastName { get; set; } = string.Empty;
 
     [Required]
+    [EmailAddress]
     public required string Email { get; set; } = string.Empty;
 
     [Required]

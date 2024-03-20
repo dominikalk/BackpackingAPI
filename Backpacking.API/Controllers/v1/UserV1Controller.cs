@@ -77,10 +77,10 @@ public class UserV1Controller : ControllerBase
 
     [HttpGet("confirmEmail")]
     [EndpointName(nameof(ConfirmEmail))]
-    public async Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string code)
+    public async Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string code, [FromQuery] string? changedEmail)
     {
         Results<ContentHttpResult, UnauthorizedHttpResult> response =
-            await _userService.ConfirmEmail(userId, code);
+            await _userService.ConfirmEmail(userId, code, changedEmail);
 
         return response;
     }
@@ -146,6 +146,21 @@ public class UserV1Controller : ControllerBase
                 new BPApiResult<ProfileDTO>(new ProfileDTO(user), 1, 1);
 
             return Ok(apiResult);
+        }
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    [EndpointName(nameof(Logout))]
+    public async Task<IActionResult> Logout()
+    {
+        Result response = await _userService.Logout();
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess()
+        {
+            return Ok();
         }
     }
 }

@@ -14,9 +14,10 @@ public interface IUserService
     Task<Result<Guid>> RegisterUser(RegisterDTO registerDTO);
     Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>> LoginUser(string userName, string password);
     Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>> RefreshToken(string refreshToken);
-    Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail(Guid userId, string code);
+    Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail(Guid userId, string code, string? changedEmail);
     Task<Ok> ResendConfirmationEmail(string email);
     Task<Results<Ok, ValidationProblem>> ForgotPassword(string email);
     Task<Results<Ok, ValidationProblem>> ResetPassword(string email, string resetCode, string newPassword);
     Task<Result<BPUser>> UpdateCurrentUserProfile(UpdateProfileDTO updateProfileDTO);
+    Task<Result> Logout();
 }
