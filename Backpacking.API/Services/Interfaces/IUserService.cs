@@ -19,5 +19,5 @@ public interface IUserService
     Task<Results<Ok, ValidationProblem>> ForgotPassword(string email);
     Task<Results<Ok, ValidationProblem>> ResetPassword(string email, string resetCode, string newPassword);
     Task<Result<BPUser>> UpdateCurrentUserProfile(UpdateProfileDTO updateProfileDTO);
-    Task<Result> Logout();
+    Task<Result> UpdateEmail(string email);
 }

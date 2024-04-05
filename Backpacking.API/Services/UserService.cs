@@ -291,18 +291,21 @@ public class UserService : IUserService
     }
 
     /// <summary>
-    /// Signs the current user out of the application
+    /// Given an email, will send the confirmation email to update it
     /// </summary>
-    /// <returns>Ok Result</returns>
-    public async Task<Result> Logout()
+    /// <param name="email">The email</param>
+    /// <returns>Ok</returns>
+    public async Task<Result> UpdateEmail(string email)
     {
-        //_signInManager.AuthenticationScheme = IdentityConstants.BearerScheme;
+        Result<BPUser> user = await GetCurrentUser();
 
-        await _signInManager.SignOutAsync();
+        if (!user.Success)
+        {
+            return user;
+        }
 
 
-        //await _httpContextAccessor.HttpContext.SignOutAsync(IdentityConstants.BearerScheme);
-
+        await SendConfirmationEmailAsync(user.Value, email, true);
         return Result.Ok();
     }
 

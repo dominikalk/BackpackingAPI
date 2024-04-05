@@ -149,12 +149,12 @@ public class UserV1Controller : ControllerBase
         }
     }
 
-    [HttpPost("logout")]
+    [HttpPost("email")]
     [Authorize]
-    [EndpointName(nameof(Logout))]
-    public async Task<IActionResult> Logout()
+    [EndpointName(nameof(UpdateEmail))]
+    public async Task<IActionResult> UpdateEmail(UpdateEmailDTO updateEmailDTO)
     {
-        Result response = await _userService.Logout();
+        Result response = await _userService.UpdateEmail(updateEmailDTO.Email);
 
         return response.Finally(HandleSuccess, this.HandleError);
 
