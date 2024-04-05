@@ -3,12 +3,18 @@ using Backpacking.API.Models;
 using Backpacking.API.Models.DTO.UserDTOs;
 using Backpacking.API.Services.Interfaces;
 using Backpacking.API.Utils;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace Backpacking.API.Services;
 
@@ -20,17 +26,26 @@ public class UserService : IUserService
     private readonly SignInManager<BPUser> _signInManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IBPContext _bPContext;
+    private readonly LinkGenerator _linkGenerator;
+    private readonly IEmailService<BPUser> _emailService;
+    private readonly IOptionsMonitor<BearerTokenOptions> _bearerTokenOptions;
 
     public UserService(
         UserManager<BPUser> userManager,
         SignInManager<BPUser> signInManager,
         IHttpContextAccessor httpContextAccessor,
-        IBPContext bPContext)
+        IBPContext bPContext,
+        LinkGenerator linkGenerator,
+        IEmailService<BPUser> emailService,
+        IOptionsMonitor<BearerTokenOptions> bearerTokenOptions)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _httpContextAccessor = httpContextAccessor;
         _bPContext = bPContext;
+        _linkGenerator = linkGenerator;
+        _emailService = emailService;
+        _bearerTokenOptions = bearerTokenOptions;
     }
 
     /// <summary>
@@ -85,12 +100,13 @@ public class UserService : IUserService
 
         IdentityResult result = await _userManager.CreateAsync(user, user.PasswordHash);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            return user.Id;
+            return new BPError(HttpStatusCode.BadRequest, String.Join(" ", result.Errors.Select(error => error.Description)));
         }
 
-        return new BPError(HttpStatusCode.BadRequest, String.Join(" ", result.Errors.Select(error => error.Description)));
+        await SendConfirmationEmailAsync(user, registerDTO.Email);
+        return user.Id;
     }
 
     /// <summary>
@@ -118,6 +134,151 @@ public class UserService : IUserService
     }
 
     /// <summary>
+    /// Will refresh a user's session given a refresh token
+    /// </summary>
+    /// <param name="refreshToken">The refresh token</param>
+    /// <returns>HttpResult or AccessTokenResponse</returns>
+    public async Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>> RefreshToken(string refreshToken)
+    {
+        ISecureDataFormat<AuthenticationTicket> refreshTokenProtector =
+            _bearerTokenOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector;
+        AuthenticationTicket? refreshTicket = refreshTokenProtector.Unprotect(refreshToken);
+
+        // Reject the /refresh attempt with a 401 if the token expired or the security stamp validation fails
+        if (refreshTicket?.Properties?.ExpiresUtc is not { } expiresUtc ||
+            DateTimeOffset.UtcNow >= expiresUtc ||
+            await _signInManager.ValidateSecurityStampAsync(refreshTicket.Principal) is not BPUser user)
+
+        {
+            return TypedResults.Challenge();
+        }
+
+        ClaimsPrincipal newPrincipal = await _signInManager.CreateUserPrincipalAsync(user);
+        return TypedResults.SignIn(newPrincipal, authenticationScheme: IdentityConstants.BearerScheme);
+    }
+
+    /// <summary>
+    /// Will confirm the users email given the userId and code, if a
+    /// changed email is provided, will change it.
+    /// </summary>
+    /// <param name="userId">The user's id</param>
+    /// <param name="code">The confirm email code</param>
+    /// <param name="changedEmail">The changed email</param>
+    /// <returns>HttpResult</returns>
+    public async Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail(Guid userId, string code, string? changedEmail)
+    {
+        if (await _userManager.FindByIdAsync(userId.ToString()) is not { } user)
+        {
+            // We could respond with a 404 instead of a 401 like Identity UI, but that feels like unnecessary information.
+            return TypedResults.Unauthorized();
+        }
+
+        try
+        {
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+        }
+        catch (FormatException)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        IdentityResult result;
+
+        if (string.IsNullOrEmpty(changedEmail))
+        {
+            result = await _userManager.ConfirmEmailAsync(user, code);
+        }
+        else
+        {
+            result = await _userManager.ChangeEmailAsync(user, changedEmail, code);
+        }
+
+
+        if (!result.Succeeded)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        return TypedResults.Text("Thank you for confirming your email.");
+    }
+
+    /// <summary>
+    /// Given an email, will resent the confirmation email
+    /// </summary>
+    /// <param name="email">The email</param>
+    /// <returns>Ok</returns>
+    public async Task<Ok> ResendConfirmationEmail(string email)
+    {
+        if (await _userManager.FindByEmailAsync(email) is not { } user)
+        {
+            return TypedResults.Ok();
+        }
+
+        await SendConfirmationEmailAsync(user, email);
+        return TypedResults.Ok();
+    }
+
+    /// <summary>
+    /// Given an email, will send a forgotten password email
+    /// </summary>
+    /// <param name="email">The email</param>
+    /// <returns>Ok or ValidationProblem</returns>
+    public async Task<Results<Ok, ValidationProblem>> ForgotPassword(string email)
+    {
+        BPUser? user = await _userManager.FindByEmailAsync(email);
+
+        if (user is not null && await _userManager.IsEmailConfirmedAsync(user))
+        {
+            string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+            _emailService.SendPasswordResetCodeAsync(user, email, HtmlEncoder.Default.Encode(code));
+        }
+
+        // Don't reveal that the user does not exist or is not confirmed, so don't return a 200 if we would have
+        // returned a 400 for an invalid code given a valid user email.
+        return TypedResults.Ok();
+    }
+
+    /// <summary>
+    /// Given an email, the reset code, and a new password, will update the
+    /// user's password
+    /// </summary>
+    /// <param name="email">The user's email</param>
+    /// <param name="resetCode">The reset code sent to the email</param>
+    /// <param name="newPassword">The new password</param>
+    /// <returns>Ok or ValidationProblem</returns>
+    public async Task<Results<Ok, ValidationProblem>> ResetPassword(string email, string resetCode, string newPassword)
+    {
+        BPUser? user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null || !(await _userManager.IsEmailConfirmedAsync(user)))
+        {
+            // Don't reveal that the user does not exist or is not confirmed, so don't return a 200 if we would have
+            // returned a 400 for an invalid code given a valid user email.
+            return CreateValidationProblem(IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken()));
+        }
+
+        IdentityResult result;
+        try
+        {
+            string code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(resetCode));
+            result = await _userManager.ResetPasswordAsync(user, code, newPassword);
+        }
+        catch (FormatException)
+        {
+            result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+        }
+
+        if (!result.Succeeded)
+        {
+            return CreateValidationProblem(result);
+        }
+
+        return TypedResults.Ok();
+    }
+
+    /// <summary>
     /// Will update the current user's profile according to the dto provided
     /// </summary>
     /// <param name="updateProfileDTO">The update information</param>
@@ -128,6 +289,99 @@ public class UserService : IUserService
             .Then(user => user.UpdateUserProfile(updateProfileDTO))
             .Then(SaveChanges);
     }
+
+    /// <summary>
+    /// Given an email, will send the confirmation email to update it
+    /// </summary>
+    /// <param name="email">The email</param>
+    /// <returns>Ok</returns>
+    public async Task<Result> UpdateEmail(string email)
+    {
+        Result<BPUser> user = await GetCurrentUser();
+
+        if (!user.Success)
+        {
+            return user;
+        }
+
+
+        await SendConfirmationEmailAsync(user.Value, email, true);
+        return Result.Ok();
+    }
+
+    /// <summary>
+    /// Given a user and an email, will sent a confirmation email
+    /// </summary>
+    /// <param name="user">The user to send the email to</param>
+    /// <param name="email">The email</param>
+    /// <param name="isChange">If the email is changing</param>
+    /// <returns>Task</returns>
+    private async Task SendConfirmationEmailAsync(BPUser user, string email, bool isChange = false)
+    {
+        string code = isChange
+                ? await _userManager.GenerateChangeEmailTokenAsync(user, email)
+                : await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+        string userId = await _userManager.GetUserIdAsync(user);
+
+        RouteValueDictionary routeValues = new RouteValueDictionary()
+        {
+            ["userId"] = userId,
+            ["code"] = code,
+        };
+
+        if (isChange)
+        {
+            // This is validated by the /confirmEmail endpoint on change.
+            routeValues.Add("changedEmail", email);
+        }
+
+        if (_httpContextAccessor.HttpContext is null)
+        {
+            throw new NotSupportedException($"Could not find endpoint named '{nameof(ConfirmEmail)}'.");
+        }
+
+        string? confirmEmailUrl = _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext, nameof(ConfirmEmail), routeValues)
+            ?? throw new NotSupportedException($"Could not find endpoint named '{nameof(ConfirmEmail)}'.");
+
+        _emailService.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(confirmEmailUrl));
+    }
+
+    /// <summary>
+    /// Creates a validation proplem from identity result
+    /// </summary>
+    /// <param name="result">The identity result</param>
+    /// <returns>The validation problem</returns>
+    private static ValidationProblem CreateValidationProblem(IdentityResult result)
+    {
+        // We expect a single error code and description in the normal case.
+        // This could be golfed with GroupBy and ToDictionary, but perf! :P
+        Debug.Assert(!result.Succeeded);
+        Dictionary<string, string[]> errorDictionary =
+            new Dictionary<string, string[]>(1);
+
+        foreach (IdentityError? error in result.Errors)
+        {
+            string[] newDescriptions;
+
+            if (errorDictionary.TryGetValue(error.Code, out string[]? descriptions))
+            {
+                newDescriptions = new string[descriptions.Length + 1];
+                Array.Copy(descriptions, newDescriptions, descriptions.Length);
+                newDescriptions[descriptions.Length] = error.Description;
+            }
+            else
+            {
+                newDescriptions = [error.Description];
+            }
+
+            errorDictionary[error.Code] = newDescriptions;
+        }
+
+        return TypedResults.ValidationProblem(errorDictionary);
+    }
+
 
     /// <summary>
     /// Will get the claims principle of the current user

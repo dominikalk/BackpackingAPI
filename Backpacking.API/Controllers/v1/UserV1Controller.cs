@@ -65,6 +65,54 @@ public class UserV1Controller : ControllerBase
         return response;
     }
 
+    [HttpPost("refresh")]
+    [EndpointName(nameof(Refresh))]
+    public async Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>> Refresh(RefreshDTO refreshDTO)
+    {
+        Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult> response =
+            await _userService.RefreshToken(refreshDTO.RefreshToken);
+
+        return response;
+    }
+
+    [HttpGet("confirmEmail")]
+    [EndpointName(nameof(ConfirmEmail))]
+    public async Task<Results<ContentHttpResult, UnauthorizedHttpResult>> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string code, [FromQuery] string? changedEmail)
+    {
+        Results<ContentHttpResult, UnauthorizedHttpResult> response =
+            await _userService.ConfirmEmail(userId, code, changedEmail);
+
+        return response;
+    }
+
+    [HttpPost("resendConfirmationEmail")]
+    [EndpointName(nameof(ResendConfirmationEmail))]
+    public async Task<Ok> ResendConfirmationEmail(ResendConfirmationEmailDTO resendConfirmationEmailDTO)
+    {
+        Ok response = await _userService.ResendConfirmationEmail(resendConfirmationEmailDTO.Email);
+
+        return response;
+    }
+
+    [HttpPost("forgotPassword")]
+    [EndpointName(nameof(ForgotPassword))]
+    public async Task<Results<Ok, ValidationProblem>> ForgotPassword(ForgotPasswordDTO forgotPasswordDTO)
+    {
+        Results<Ok, ValidationProblem> response = await _userService.ForgotPassword(forgotPasswordDTO.Email);
+
+        return response;
+    }
+
+    [HttpPost("resetPassword")]
+    [EndpointName(nameof(ResetPassword))]
+    public async Task<Results<Ok, ValidationProblem>> ResetPassword(ResetPasswordDTO resetPasswordDTO)
+    {
+        Results<Ok, ValidationProblem> response =
+            await _userService.ResetPassword(resetPasswordDTO.Email, resetPasswordDTO.ResetCode, resetPasswordDTO.NewPassword);
+
+        return response;
+    }
+
     [HttpGet("profile")]
     [Authorize]
     [EndpointName(nameof(GetProfile))]
@@ -98,6 +146,21 @@ public class UserV1Controller : ControllerBase
                 new BPApiResult<ProfileDTO>(new ProfileDTO(user), 1, 1);
 
             return Ok(apiResult);
+        }
+    }
+
+    [HttpPost("email")]
+    [Authorize]
+    [EndpointName(nameof(UpdateEmail))]
+    public async Task<IActionResult> UpdateEmail(UpdateEmailDTO updateEmailDTO)
+    {
+        Result response = await _userService.UpdateEmail(updateEmailDTO.Email);
+
+        return response.Finally(HandleSuccess, this.HandleError);
+
+        IActionResult HandleSuccess()
+        {
+            return Ok();
         }
     }
 }

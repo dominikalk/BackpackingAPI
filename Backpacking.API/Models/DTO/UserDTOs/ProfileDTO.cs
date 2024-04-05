@@ -6,6 +6,7 @@ public class ProfileDTO
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string? Bio { get; set; }
     public DateTimeOffset JoinedDate { get; set; }
 
@@ -15,6 +16,7 @@ public class ProfileDTO
         FirstName = user.FirstName;
         LastName = user.LastName;
         UserName = user.UserName ?? string.Empty;
+        Email = user.Email ?? string.Empty;
         Bio = user.Bio;
         JoinedDate = user.JoinedDate;
     }
