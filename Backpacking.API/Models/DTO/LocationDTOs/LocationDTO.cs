@@ -13,8 +13,8 @@ public class LocationDTO
     {
         Id = location.Id;
         Name = location.Name;
-        Longitude = location.Longitude;
-        Latitude = location.Latitude;
+        Longitude = Location.RoundCoordinatePrecision(location.Longitude);
+        Latitude = Location.RoundCoordinatePrecision(location.Latitude);
         ArriveDate = location.ArriveDate;
         DepartDate = location.DepartDate == DateTimeOffset.MaxValue ? null : location.DepartDate;
     }

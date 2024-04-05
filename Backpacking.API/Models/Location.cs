@@ -75,8 +75,8 @@ public class Location : IBPModel
         return new Location()
         {
             Name = currentLocationDto.Name,
-            Longitude = currentLocationDto.Longitude,
-            Latitude = currentLocationDto.Latitude,
+            Longitude = RoundCoordinatePrecision(currentLocationDto.Longitude),
+            Latitude = RoundCoordinatePrecision(currentLocationDto.Latitude),
             ArriveDate = DateTimeOffset.UtcNow,
             LocationType = LocationType.VisitedLocation,
             UserId = userId,
@@ -95,8 +95,8 @@ public class Location : IBPModel
         return new Location()
         {
             Name = plannedLocationDto.Name,
-            Longitude = plannedLocationDto.Longitude,
-            Latitude = plannedLocationDto.Latitude,
+            Longitude = RoundCoordinatePrecision(plannedLocationDto.Longitude),
+            Latitude = RoundCoordinatePrecision(plannedLocationDto.Latitude),
             ArriveDate = plannedLocationDto.ArriveDate,
             DepartDate = plannedLocationDto.DepartDate ?? DateTimeOffset.MaxValue,
             LocationType = LocationType.PlannedLocation,
@@ -127,8 +127,8 @@ public class Location : IBPModel
         }
 
         Name = dto.Name;
-        Longitude = dto.Longitude;
-        Latitude = dto.Latitude;
+        Longitude = RoundCoordinatePrecision(dto.Longitude);
+        Latitude = RoundCoordinatePrecision(dto.Latitude);
         ArriveDate = dto.ArriveDate;
         DepartDate = dto.DepartDate ?? DateTimeOffset.MaxValue;
 
@@ -148,12 +148,22 @@ public class Location : IBPModel
         }
 
         Name = dto.Name;
-        Longitude = dto.Longitude;
-        Latitude = dto.Latitude;
+        Longitude = RoundCoordinatePrecision(dto.Longitude);
+        Latitude = RoundCoordinatePrecision(dto.Latitude);
         ArriveDate = dto.ArriveDate;
         DepartDate = dto.DepartDate ?? DateTimeOffset.MaxValue;
 
         return this;
+    }
+
+    /// <summary>
+    /// Given a coordinate, will round it to 1.11km precision
+    /// </summary>
+    /// <param name="coordinate">The coordinate to round</param>
+    /// <returns>The rounded coordinate</returns>
+    public static float RoundCoordinatePrecision(float coordinate)
+    {
+        return (float)Math.Round(coordinate, 2);
     }
 
     public class Errors
