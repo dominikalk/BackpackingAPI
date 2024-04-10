@@ -37,7 +37,7 @@ Planned locations are more informal and simply denote the user's intention for t
 
 ### Geocoding
 
-Forward geocoding is the process of obtaining coordinates based on an address or search string. In this API, this is used for obtaining the coordinates and name to associate with a planned location the user is logging based on a search string. This API makes use of PositionStack's Geocoding API to return a list of locations based on the user's search string. E.g. searching for "London" gives the following results:
+Forward geocoding is the process of obtaining coordinates based on an address or search string. In this API, this is used for obtaining the coordinates and name to associate with a planned location the user is logging. This API makes use of PositionStack's Geocoding API to return a list of locations based on the user's search string. E.g. searching for "London" gives the following results:
 ```
 [
 	{
